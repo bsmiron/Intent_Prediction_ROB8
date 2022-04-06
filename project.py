@@ -26,15 +26,20 @@ def get_coordinate(pixel_x, pixel_y, depth_map):
     u = int(pixel_x)
     v = int(pixel_y)
     depth = depth_map
+
+    # Can substituate depth with depth_f and eliminate function distance_depth
+    # depth_f = int(depth_image[pixel_x, pixel_y]) #this is in mm
     
+
+    # X and Y might be in meters
     X = depth*(u-matrix[0][2])/(matrix[0][0])
     Y = depth*(v-matrix[1][2])/(matrix[1][1])
-    Z = depth
-    return [X,Y,Z]
+    # Z = depth_f
+    return [X,Y]
 
 # Create function that calculates Depth Distance aka Z from the middle of a ROI
 def distance_depth(point_x, point_y):
-    return depth_image[point_x, point_y]/10
+    return int(depth_image[point_x, point_y])/10
 
 # Configure depth and color streams
 pipeline = rs.pipeline()
@@ -100,21 +105,24 @@ try:
                         cx, cy = int(lm.x *w), int(lm.y*h)
                         if id == 9:
                             cv2.circle(color_image, (cx,cy), 10, (255,0,255), cv2.FILLED)
-                            distance_lm = depth_image[cx,cy]/10
+                            distance_lm = depth_image[cx,cy]
                             cv2.putText(color_image, "{}cm".format(int(distance_lm)), (cx, cy-10), 0, 1, (255,182,193), 2)
+                          
 
-                            if distance_lm - distance_roi > TRASHOLD:
-                                print("is NOT going to pick up")
-                            else:
-                                print("IS GOING TO PICK UP")
-
+        # Print real-world coordinates of a given point/s
+        distance_roi = distance_depth(309, 408)
+        rw_x, rw_y = get_coordinate(309, 408, distance_roi)
+        print(rw_x, rw_y, distance_roi)
 
         # Drawing ROI for cup and find the distance in centimeter
         cv2.rectangle(color_image, (170,340), (448,477), (0,0,255), 4) 
         cv2.circle(color_image, (309, 408), 5, (255,0,.0), 2, cv2.FILLED)
-        distance_roi = depth_image[309, 408]/10
-        cv2.putText(color_image, "{}cm".format(int(distance_roi)), (309, 408-10), 0, 1, (255,182,193), 2)
-
+        cv2.putText(color_image, (rw_x, rw_y, distance_roi), (309, 408-10), 0, 1, (255,182,193), 2)
+        
+        if distance_lm - distance_roi > TRASHOLD:
+            print("is NOT going to pick up")
+        else:
+            print("IS GOING TO PICK UP")
 
 
         # If depth and color resolutions are different, resize color image to match depth image for display
@@ -124,7 +132,7 @@ try:
         else:
             images = np.hstack((color_image, depth_colormap))
                             
-
+        
         # Show images
         cv2.namedWindow('Project', cv2.WINDOW_AUTOSIZE)
         cv2.imshow('Project', images)
