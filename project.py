@@ -99,7 +99,7 @@ try:
         # Drawing ROI for cup and find the distance in centimeter
         cv2.rectangle(color_image, (170,340), (448,477), (0,0,255), 4) 
         cv2.circle(color_image, (309, 408), 5, (255,0,.0), 2, cv2.FILLED)
-        cv2.putText(color_image, "{}cm".format(string), (309, 408-10), 0, 1, (255,182,193), 2)
+        cv2.putText(color_image, "x:{0} y:{1} z:{2}".format(rw_x, rw_y ,rw_z), (309-100, 408-20), 0, 1, (255,182,193), 2)
     
         # Drawing hand landmarks
         mp_hand = mp.solutions.hands
@@ -119,8 +119,7 @@ try:
                             cv2.circle(color_image, (cx,cy), 10, (255,0,255), cv2.FILLED)
                             distance_lm = distance_depth(cx,cy)
                             rww_x, rww_y, rww_z = get_coordinate(cx, cy)
-                            string_lm = [rww_x, rww_y, rww_z]
-                            cv2.putText(color_image, "{}cm".format(string_lm), (cx, cy-10), 0, 1, (255,182,193), 2)
+                            cv2.putText(color_image, "x:{0} y:{1} z:{2}".format(rww_x, rww_y, rww_z), (cx-100, cy-20), 0, 1, (255,182,193), 2)
                             if rww_z - rw_z > TRASHOLD:
                                 print("is NOT going to pick up")
                             else:
