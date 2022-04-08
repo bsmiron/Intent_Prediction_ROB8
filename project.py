@@ -20,22 +20,22 @@ TRASHOLD = 15
 
 
 # Get real world coordinates, not sure if in meter since depthmap is given in mm
-def get_coordinate(pixel_x, pixel_y, depth_map):
+def get_coordinate(pixel_x, pixel_y):
      
     matrix = CamMatrix
     u = int(pixel_x)
     v = int(pixel_y)
-    depth = depth_map
+    #depth = depth_map
 
     # Can substituate depth with depth_f and eliminate function distance_depth
-    # depth_f = int(depth_image[pixel_x, pixel_y]) #this is in mm
+    depth_f = int(depth_image[pixel_x, pixel_y])/10 #this is in cm
     
 
     # X and Y might be in meters
-    X = depth*(u-matrix[0][2])/(matrix[0][0])
-    Y = depth*(v-matrix[1][2])/(matrix[1][1])
-    # Z = depth_f
-    return [X,Y]
+    X = depth_f*(u-matrix[0][2])/(matrix[0][0])
+    Y = depth_f*(v-matrix[1][2])/(matrix[1][1])
+    Z = depth_f
+    return [int(X), int(Y), int(Z)]
 
 # Create function that calculates Depth Distance aka Z from the middle of a ROI
 def distance_depth(point_x, point_y):
@@ -90,6 +90,17 @@ try:
         depth_colormap_dim = depth_colormap.shape
         color_colormap_dim = color_image.shape
 
+
+        # Print real-world coordinates of a given point/s
+        # distance_roi = distance_depth(309, 408)
+        rw_x, rw_y, rw_z = get_coordinate(309, 408)
+        string = [rw_x, rw_y, rw_z]        
+
+        # Drawing ROI for cup and find the distance in centimeter
+        cv2.rectangle(color_image, (170,340), (448,477), (0,0,255), 4) 
+        cv2.circle(color_image, (309, 408), 5, (255,0,.0), 2, cv2.FILLED)
+        cv2.putText(color_image, "{}cm".format(string), (309, 408-10), 0, 1, (255,182,193), 2)
+    
         # Drawing hand landmarks
         mp_hand = mp.solutions.hands
         hands = mp_hand.Hands(max_num_hands=1)
@@ -103,35 +114,24 @@ try:
                         #print(id,lm) id = type of landmark; lm coordinates of the landmark
                         h, w, c = color_image.shape
                         cx, cy = int(lm.x *w), int(lm.y*h)
+
                         if id == 9:
                             cv2.circle(color_image, (cx,cy), 10, (255,0,255), cv2.FILLED)
-                            distance_lm = depth_image[cx,cy]
-                            cv2.putText(color_image, "{}cm".format(int(distance_lm)), (cx, cy-10), 0, 1, (255,182,193), 2)
-                          
-
-        # Print real-world coordinates of a given point/s
-        distance_roi = distance_depth(309, 408)
-        rw_x, rw_y = get_coordinate(309, 408, distance_roi)
-        print(rw_x, rw_y, distance_roi)
-
-        # Drawing ROI for cup and find the distance in centimeter
-        cv2.rectangle(color_image, (170,340), (448,477), (0,0,255), 4) 
-        cv2.circle(color_image, (309, 408), 5, (255,0,.0), 2, cv2.FILLED)
-        cv2.putText(color_image, (rw_x, rw_y, distance_roi), (309, 408-10), 0, 1, (255,182,193), 2)
-        
-        if distance_lm - distance_roi > TRASHOLD:
-            print("is NOT going to pick up")
-        else:
-            print("IS GOING TO PICK UP")
-
+                            distance_lm = distance_depth(cx,cy)
+                            rww_x, rww_y, rww_z = get_coordinate(cx, cy)
+                            string_lm = [rww_x, rww_y, rww_z]
+                            cv2.putText(color_image, "{}cm".format(string_lm), (cx, cy-10), 0, 1, (255,182,193), 2)
+                            if rww_z - rw_z > TRASHOLD:
+                                print("is NOT going to pick up")
+                            else:
+                                print("IS GOING TO PICK UP")
 
         # If depth and color resolutions are different, resize color image to match depth image for display
         if depth_colormap_dim != color_colormap_dim:
             resized_color_image = cv2.resize(color_image, dsize=(depth_colormap_dim[1], depth_colormap_dim[0]), interpolation=cv2.INTER_AREA)
             images = np.hstack((resized_color_image, depth_colormap))
         else:
-            images = np.hstack((color_image, depth_colormap))
-                            
+            images = np.hstack((color_image, depth_colormap))      
         
         # Show images
         cv2.namedWindow('Project', cv2.WINDOW_AUTOSIZE)
