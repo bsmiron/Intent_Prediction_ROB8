@@ -18,6 +18,7 @@ fPixels = CamMatrix[0,0]
 
 TRASHOLD = 15
 
+count = 0
 
 # Get real world coordinates, not sure if in meter since depthmap is given in mm
 def get_coordinate(pixel_x, pixel_y):
@@ -40,6 +41,15 @@ def get_coordinate(pixel_x, pixel_y):
 # Create function that calculates Depth Distance aka Z from the middle of a ROI
 def distance_depth(point_x, point_y):
     return int(depth_image[point_x, point_y])/10
+
+# Create function to draw ROI
+def create_roi(x_up, y_up, x_down, y_down):
+    cv2.rectangle(color_image, (x_up, y_up), (x_up, y_down), (0,0,255), 4) 
+    x_middle = int(x_up + x_down)/2
+    y_middle = (y_up + y_down)/2
+    cv2.circle(color_image, (x_middle, y_middle), 5, (255,0,.0), 2, cv2.FILLED)
+    rw_x, rw_y, rw_z = get_coordinate(x_middle, y_middle)
+    cv2.putText(color_image, "x:{0} y:{1} z:{2}".format(rw_x, rw_y ,rw_z), (x_middle-100, y_middle-20), 0, 1, (255,182,193), 2)
 
 # Configure depth and color streams
 pipeline = rs.pipeline()
@@ -89,17 +99,24 @@ try:
 
         depth_colormap_dim = depth_colormap.shape
         color_colormap_dim = color_image.shape
-
+         
+        # Extract 1st frame depth and save it as a .csv
+        while count != 1:
+            np.savetxt("first_frame_depth.csv", depth_image, delimiter=',')
+            count = 1
 
         # Print real-world coordinates of a given point/s
         # distance_roi = distance_depth(309, 408)
         rw_x, rw_y, rw_z = get_coordinate(309, 408)
-        string = [rw_x, rw_y, rw_z]        
+            
 
         # Drawing ROI for cup and find the distance in centimeter
-        cv2.rectangle(color_image, (170,340), (448,477), (0,0,255), 4) 
-        cv2.circle(color_image, (309, 408), 5, (255,0,.0), 2, cv2.FILLED)
-        cv2.putText(color_image, "x:{0} y:{1} z:{2}".format(rw_x, rw_y ,rw_z), (309-100, 408-20), 0, 1, (255,182,193), 2)
+        create_roi(170, 340, 448, 477)  
+
+        # Drawing ROI for cup and find the distance in centimeter
+        # cv2.rectangle(color_image, (170,340), (448,477), (0,0,255), 4) 
+        # cv2.circle(color_image, (309, 408), 5, (255,0,.0), 2, cv2.FILLED)
+        # cv2.putText(color_image, "x:{0} y:{1} z:{2}".format(rw_x, rw_y ,rw_z), (309-100, 408-20), 0, 1, (255,182,193), 2)
     
         # Drawing hand landmarks
         mp_hand = mp.solutions.hands
