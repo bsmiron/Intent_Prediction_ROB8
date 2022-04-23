@@ -2,11 +2,27 @@ import pyrealsense2 as rs
 import numpy as np
 import cv2
 import mediapipe as mp
+import panda as pd
 
 FX = 386.953
 FY = 386.953
 PPX = 319.307
 PPY = 241.853
+
+# Create an array to do a picked up test, if object
+# is picked up the no object position becomes 0 
+
+no_obj = 4
+check_if_picked = np.empty(no_obj, 1)
+# [1, 1, 1, 1]
+
+# Develope to be like this in the futer iot have to ROIs
+# categorized as object with numbers aka 
+# 150 1     Object1         can be picked up
+# 283 0     Obhect2         was picked up
+# 15 1      Object3
+# 482 1     Object4
+
 
 CamMatrix = np.asarray([[FX, 0.0, PPX, 0],
             		    [0.0, FY, PPY, 0],
@@ -105,10 +121,15 @@ try:
             np.savetxt("first_frame_depth.csv", depth_image, delimiter=',')
             count = 1
 
+        # Read the first_frame_depth to initialize the ground truth
+        # Check data ground_truth
+        ground_truth = pd.read_csv("first_frame_depth.csv", sep=',')
+        
+
         # Print real-world coordinates of a given point/s
         # distance_roi = distance_depth(309, 408)
         rw_x, rw_y, rw_z = get_coordinate(309, 408)
-            
+        
 
         # Drawing ROI for cup and find the distance in centimeter
         create_roi(170, 340, 448, 477)  
