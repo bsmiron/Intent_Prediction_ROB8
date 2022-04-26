@@ -33,8 +33,16 @@ fPixels = CamMatrix[0,0]
 
 
 TRASHOLD = 15
-
 count = 0
+
+# Checking the depth from 1st frame and actual frame
+def check_depth(pixel_x, pixel_y):
+    if int(depth_image[pixel_x, pixel_y])/10 == int(first_frame_depth[pixel_x, pixel_y])/10:
+        return True
+    else:
+        return False
+            
+
 
 # Get real world coordinates, not sure if in meter since depthmap is given in mm
 def get_coordinate(pixel_x, pixel_y):
@@ -120,8 +128,9 @@ try:
         # Extract 1st frame depth and save it as a .csv
         while count != 1:
             np.savetxt("first_frame_depth.csv", depth_image, delimiter=',')
+            first_frame_depth = depth_image
             count = 1
-            # Construct the final check if picked up matrix
+            # Construct the final check if picked up matrix add xi and yi unitll i = n
             check_if_picked = np.append(check_if_picked, x1_mid)
             check_if_picked = np.append(check_if_picked, y1_mid)
 
