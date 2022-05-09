@@ -2,27 +2,12 @@ import pyrealsense2 as rs
 import numpy as np
 import cv2
 import mediapipe as mp
-import panda as pd
+import time
 
 FX = 386.953
 FY = 386.953
 PPX = 319.307
 PPY = 241.853
-
-# Create an array to do a picked up test, if object
-# is picked up the no object position becomes 0 
-
-no_obj = 4
-check_if_picked = np.empty(no_obj, 1)
-# [1, 1, 1, 1]
-
-# Develope to be like this in the futer iot have to ROIs
-# categorized as object with numbers aka 
-# 150 1     Object1         can be picked up
-# 283 0     Obhect2         was picked up
-# 15 1      Object3
-# 482 1     Object4
-
 
 CamMatrix = np.asarray([[FX, 0.0, PPX, 0],
             		    [0.0, FY, PPY, 0],
@@ -31,21 +16,23 @@ CamMatrix = np.asarray([[FX, 0.0, PPX, 0],
 
 fPixels = CamMatrix[0,0]
 
-
+MAX_DISTANCE = 115
 TRASHOLD = 15
-count = 0
 
-# Checking the depth from 1st frame and actual frame
-def check_depth(pixel_x, pixel_y):
-    if int(depth_image[pixel_x, pixel_y])/10 == int(first_frame_depth[pixel_x, pixel_y])/10:
-        return True
-    else:
-        return False
-            
+# Get an attention score_depth
+def get_score_depth(hand_distance, obj_position, x_hand, x_obj):
+    if hand_distance == 0:
+        hand_distance = 20
+    if obj_position == 0:
+        obj_position = TRASHOLD        
+    grader = int(MAX_DISTANCE)/int(obj_position)
+    x_score = abs(10 - abs(int(x_hand)-int(x_obj)))
+    score_depth = int(MAX_DISTANCE)/(int(hand_distance)*grader) 
+    return score_depth * x_score
 
 
 # Get real world coordinates, not sure if in meter since depthmap is given in mm
-def get_coordinate(pixel_x, pixel_y):
+def get_coordinate(pixel_y, pixel_x):
      
     matrix = CamMatrix
     u = int(pixel_x)
@@ -53,7 +40,7 @@ def get_coordinate(pixel_x, pixel_y):
     #depth = depth_map
 
     # Can substituate depth with depth_f and eliminate function distance_depth
-    depth_f = int(depth_image[pixel_x, pixel_y])/10 #this is in cm
+    depth_f = int(depth_image[pixel_x, pixel_y])/10 #this is in cmeters
     
 
     # X and Y might be in meters
@@ -64,17 +51,7 @@ def get_coordinate(pixel_x, pixel_y):
 
 # Create function that calculates Depth Distance aka Z from the middle of a ROI
 def distance_depth(point_x, point_y):
-    return int(depth_image[point_x, point_y])/10
-
-# Create function to draw ROI
-def create_roi(x_up, y_up, x_down, y_down):
-    cv2.rectangle(color_image, (x_up, y_up), (x_up, y_down), (0,0,255), 4) 
-    x_middle = int(x_up + x_down)/2
-    y_middle = (y_up + y_down)/2
-    cv2.circle(color_image, (x_middle, y_middle), 5, (255,0,.0), 2, cv2.FILLED)
-    rw_x, rw_y, rw_z = get_coordinate(x_middle, y_middle)
-    cv2.putText(color_image, "x:{0} y:{1} z:{2}".format(rw_x, rw_y ,rw_z), (x_middle-100, y_middle-20), 0, 1, (255,182,193), 2)
-    return x_middle, y_middle
+    return int(depth_image[point_x, point_y])
 
 # Configure depth and color streams
 pipeline = rs.pipeline()
@@ -107,7 +84,7 @@ pipeline.start(config)
 
 try:
     while True:
-
+        seconds = time.time()
         # Wait for a coherent pair of frames: depth and color
         frames = pipeline.wait_for_frames()
         depth_frame = frames.get_depth_frame()
@@ -124,34 +101,22 @@ try:
 
         depth_colormap_dim = depth_colormap.shape
         color_colormap_dim = color_image.shape
-         
-        # Extract 1st frame depth and save it as a .csv
-        while count != 1:
-            np.savetxt("first_frame_depth.csv", depth_image, delimiter=',')
-            first_frame_depth = depth_image
-            count = 1
-            # Construct the final check if picked up matrix add xi and yi unitll i = n
-            check_if_picked = np.append(check_if_picked, x1_mid)
-            check_if_picked = np.append(check_if_picked, y1_mid)
 
 
-        # Read the first_frame_depth to initialize the ground truth
-        # Check data ground_truth
-        ground_truth = pd.read_csv("first_frame_depth.csv", sep=',')
-        
+        # Test zone
+        test_x, test_y, test_z = get_coordinate(420, 350)
+        cv2.circle(color_image, (420, 350), 5, (255,0,.0), 2, cv2.FILLED)
+        cv2.putText(color_image, "zobj2:{}".format(test_z), (420-100, 350-20), 0, 1, (255,182,193), 2)
 
         # Print real-world coordinates of a given point/s
         # distance_roi = distance_depth(309, 408)
-        rw_x, rw_y, rw_z = get_coordinate(309, 408)
         
-
+        
         # Drawing ROI for cup and find the distance in centimeter
-        x1_mid, y1_mid =  create_roi(170, 340, 448, 477)  
-
-        # Drawing ROI for cup and find the distance in centimeter
-        # cv2.rectangle(color_image, (170,340), (448,477), (0,0,255), 4) 
-        # cv2.circle(color_image, (309, 408), 5, (255,0,.0), 2, cv2.FILLED)
-        # cv2.putText(color_image, "x:{0} y:{1} z:{2}".format(rw_x, rw_y ,rw_z), (309-100, 408-20), 0, 1, (255,182,193), 2)
+        rw_x, rw_y, rw_z = get_coordinate(250, 350)
+        cv2.rectangle(color_image, (170,340), (448,477), (0,0,255), 4) 
+        cv2.circle(color_image, (250, 350), 5, (255,0,.0), 2, cv2.FILLED)
+        cv2.putText(color_image, "zobj1:{}".format(rw_z), (250-100, 350-20), 0, 1, (255,182,193), 2)
     
         # Drawing hand landmarks
         mp_hand = mp.solutions.hands
@@ -166,16 +131,21 @@ try:
                         #print(id,lm) id = type of landmark; lm coordinates of the landmark
                         h, w, c = color_image.shape
                         cx, cy = int(lm.x *w), int(lm.y*h)
-
+                        
                         if id == 9:
                             cv2.circle(color_image, (cx,cy), 10, (255,0,255), cv2.FILLED)
-                            distance_lm = distance_depth(cx,cy)
-                            rww_x, rww_y, rww_z = get_coordinate(cx, cy)
+                            # distance_lm = distance_depth(cx,cy)
+                            rww_x, rww_y, rww_z = get_coordinate(cy, cx) #y and x
+                            score_depth = get_score_depth(rww_z, rw_z, rww_x, rw_x)
+                            score_depth_test = get_score_depth(rww_z, test_z, rw_x, test_x)
                             cv2.putText(color_image, "x:{0} y:{1} z:{2}".format(rww_x, rww_y, rww_z), (cx-100, cy-20), 0, 1, (255,182,193), 2)
-                            if rww_z - rw_z > TRASHOLD:
-                                print("is NOT going to pick up")
-                            else:
-                                print("IS GOING TO PICK UP")
+                            cv2.putText(color_image, "score obj1:{}".format(score_depth), (10, 20), 0, 1, (0, 255, 0), 2)
+                            cv2.putText(color_image, "score test obj2:{}".format(score_depth_test), (10, 50), 0, 1, (0, 0, 255), 2)
+
+                            # if score_depth < 0.8:
+                            #     print("is NOT going to pick up")
+                            # else:
+                            #     print("IS GOING TO PICK UP")
 
         # If depth and color resolutions are different, resize color image to match depth image for display
         if depth_colormap_dim != color_colormap_dim:
