@@ -1,0 +1,7 @@
+import pyrealsense2 as rs
+import numpy as np
+import cv2
+import mediapipe as mp
+
+def get_scroe(trashold, maximum, distance):
+    
