@@ -16,19 +16,24 @@ CamMatrix = np.asarray([[FX, 0.0, PPX, 0],
 
 fPixels = CamMatrix[0,0]
 
-MAX_DISTANCE = 115
-TRASHOLD = 15
+MAX_DISTANCE = 200
+TRASHOLD = 20
 
 # Get an attention score_depth
-def get_score_depth(hand_distance, obj_position, x_hand, x_obj):
+def get_score_attention(hand_distance, obj_position, x_hand, x_obj):
+    #get rid of some errors
     if hand_distance == 0:
         hand_distance = 20
+    #get rid of some errors
     if obj_position == 0:
         obj_position = TRASHOLD        
     grader = int(MAX_DISTANCE)/int(obj_position)
-    x_score = abs(10 - abs(int(x_hand)-int(x_obj)))
-    score_depth = int(MAX_DISTANCE)/(int(hand_distance)*grader) 
-    return score_depth * x_score
+    x_score = abs(int(x_hand)-int(x_obj))
+    score_depth = int(MAX_DISTANCE)/(int(hand_distance)*grader)
+    if x_score <= 1:
+        x_score = 1 
+    # Adjusting the importance of the score of the attention        
+    return int*(((score_depth * 8)+ (x_score * 2)) /2)
 
 
 # Get real world coordinates, not sure if in meter since depthmap is given in mm
@@ -136,11 +141,11 @@ try:
                             cv2.circle(color_image, (cx,cy), 10, (255,0,255), cv2.FILLED)
                             # distance_lm = distance_depth(cx,cy)
                             rww_x, rww_y, rww_z = get_coordinate(cy, cx) #y and x
-                            score_depth = get_score_depth(rww_z, rw_z, rww_x, rw_x)
-                            score_depth_test = get_score_depth(rww_z, test_z, rw_x, test_x)
+                            score_attention = get_score_attention(rww_z, rw_z, rww_x, rw_x)
+                            score_attention_test = get_score_attention(rww_z, test_z, rw_x, test_x)
                             cv2.putText(color_image, "x:{0} y:{1} z:{2}".format(rww_x, rww_y, rww_z), (cx-100, cy-20), 0, 1, (255,182,193), 2)
-                            cv2.putText(color_image, "score obj1:{}".format(score_depth), (10, 20), 0, 1, (0, 255, 0), 2)
-                            cv2.putText(color_image, "score test obj2:{}".format(score_depth_test), (10, 50), 0, 1, (0, 0, 255), 2)
+                            cv2.putText(color_image, "score obj1:{}".format(score_attention), (10, 20), 0, 1, (0, 255, 0), 2)
+                            cv2.putText(color_image, "score test obj2:{}".format(score_attention_test), (10, 50), 0, 1, (0, 0, 255), 2)
 
                             # if score_depth < 0.8:
                             #     print("is NOT going to pick up")
