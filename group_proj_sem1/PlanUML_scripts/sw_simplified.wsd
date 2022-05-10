@@ -1,0 +1,22 @@
+@startuml
+
+participant ControlLogic
+participant VisualSystem
+participant Robot
+
+loop for each pose in list
+    ControlLogic -> Robot: go to pose
+    Robot -> ControlLogic: return joint angles
+
+    loop for each camera
+        ControlLogic -> VisualSystem: compute polar coordinate to\n calibration object
+        VisualSystem -> ControlLogic: return polar coordinate
+    end
+    ControlLogic -> ControlLogic: calculate position of local view camera
+    ControlLogic -> ControlLogic: perform inverse kinematics to determine joint angles
+    ControlLogic -> ControlLogic: pair internal odometry meausrements with vision measurements
+end
+
+ControlLogic -> ControlLogic: calculate the error for each joint
+ControlLogic -> Robot: calibrate the robot based on the errors
+@enduml

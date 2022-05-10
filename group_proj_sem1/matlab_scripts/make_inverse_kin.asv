@@ -1,0 +1,3 @@
+
+pos = 
+q = ikSolverUR5All(pos,eul,qPrevious)

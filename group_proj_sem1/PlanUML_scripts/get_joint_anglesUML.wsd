@@ -1,0 +1,17 @@
+@startuml
+
+participant RemoteController
+participant UR5
+
+RemoteController -> UR5: "(7)"
+
+activate UR5
+note over UR5
+    UR5 reads the encoders and packs
+    the informationin a CSV format.
+end note
+
+UR5 -> RemoteController: "[-1.5710,-1.5710,-1.2543,-3.6606,-1.5708,-3.1416]"
+
+deactivate UR5
+@enduml

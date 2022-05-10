@@ -1,0 +1,35 @@
+@startuml
+
+participant Rob7FAST_getKeypoints
+participant Rob7FAST_getPixelScoreFromImage
+participant Rob7FAST_getPixelScore
+
+[-> Rob7FAST_getKeypoints: get keypoints from image
+loop for every 3x3 pixel square in image 
+    loop for every pixel in 3x3
+        Rob7FAST_getKeypoints -> Rob7FAST_getPixelScoreFromImage: compute score for this pixel
+        Rob7FAST_getPixelScoreFromImage -> Rob7FAST_getPixelScoreFromImage: created the circle of pixels around the\n center pixel
+        Rob7FAST_getPixelScoreFromImage -> Rob7FAST_getPixelScore: get score based circle and center pixel
+        note over Rob7FAST_getPixelScore
+            Check if there are at least 12 contiguous
+            pixels in the circle that have their
+            intensity either higher or lower than
+            the center pixel plus the threshold. 
+        endnote
+        note over Rob7FAST_getPixelScore
+            If there are then compute the score by
+            summing up the absolute difference between
+            the intensity of the center pixel and each
+            of the pixels in the contiguous set.  
+        endnote
+        Rob7FAST_getPixelScore -> Rob7FAST_getPixelScoreFromImage: retrun score if it is a keypoint\n or -1 if it is not
+        Rob7FAST_getPixelScoreFromImage -> Rob7FAST_getKeypoints: retrun score if it is a keypoint\n or -1 if it is not
+    end
+    
+    Rob7FAST_getKeypoints -> Rob7FAST_getKeypoints: store the keypoint with the highest score \n(if it exists) 
+end
+
+Rob7FAST_getKeypoints ->[ : return the array of keypoints
+
+
+@enduml
