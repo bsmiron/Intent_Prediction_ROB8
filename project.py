@@ -158,7 +158,7 @@ try:
         
         # Drawing ROI for cup and find the distance in centimeter
         rw_x, rw_y, rw_z = get_coordinate(250, 350)
-        cv2.rectangle(color_image, (170,340), (448,477), (0,0,255), 4) 
+        # cv2.rectangle(color_image, (170,340), (448,477), (0,0,255), 4) 
         cv2.circle(color_image, (250, 350), 5, (255,0,.0), 2, cv2.FILLED)
         cv2.putText(color_image, "zobj1:{}".format(rw_z), (250-100, 350-20), 0, 1, (255,182,193), 2)
     
