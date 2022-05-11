@@ -36,11 +36,16 @@ TRASHOLD = 20
 
 # Detecting objects based on colors
 def draw_rectangle(mask_color, frame):
+    x_middle = 0 
+    y_middle = 0
     cn = cv2.findContours(mask_color, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
     if len(cn)>0:
         roi = max(cn, key=cv2.contourArea)
         xg, yg, wg, hg = cv2.boundingRect(roi)
         cv2.rectangle(frame, (xg, yg), (xg + wg, yg + hg), (0,255,0), 3)
+        x_middle = int((xg + xg + wg) / 2)
+        y_middle = int((yg + yg + hg) / 2 )
+    return x_middle, y_middle
         
 
 # Get an attention score_depth
@@ -128,12 +133,18 @@ try:
         mask_red = cv2.inRange(frame_hsv, red_lower_range, red_upper_range)
         mask_green = cv2.inRange(frame_hsv, green_lower_range, green_upper_range)
 
-        draw_rectangle(mask_blue, color_image)
-        draw_rectangle(mask_red, color_image)
-        draw_rectangle(mask_green, color_image)
+        x_blue, y_blue = draw_rectangle(mask_blue, color_image)
+        x_red, y_red = draw_rectangle(mask_red, color_image)
+        x_green, y_green =draw_rectangle(mask_green, color_image)
         
-###############################################################################################################################
+############################################### Get 3D coordinates #####################################################################
 
+        x_world_blue, y_world_blue, z_world_blue = get_coordinate(y_blue, x_blue)
+        x_world_red, y_world_red, z_world_red = get_coordinate(y_red, x_red)
+        x_world_green, y_world_green, z_world_green = get_coordinate(y_green, x_green)
+
+
+############################################## Predefined Points #####################################################################
 
         # Test zone
         test_x, test_y, test_z = get_coordinate(420, 350)
@@ -149,7 +160,10 @@ try:
         # cv2.rectangle(color_image, (170,340), (448,477), (0,0,255), 4) 
         cv2.circle(color_image, (250, 350), 5, (255,0,.0), 2, cv2.FILLED)
         cv2.putText(color_image, "zobj1:{}".format(rw_z), (250-100, 350-20), 0, 1, (255,182,193), 2)
-    
+
+
+############################################# Hand landmarks/Hand detection ################################################################
+
         # Drawing hand landmarks
         mp_hand = mp.solutions.hands
         hands = mp_hand.Hands(max_num_hands=1)
@@ -167,10 +181,12 @@ try:
                         if id == 9:
                             cv2.circle(color_image, (cx,cy), 10, (255,0,255), cv2.FILLED)
                             # distance_lm = distance_depth(cx,cy)
-                            rww_x, rww_y, rww_z = get_coordinate(cy, cx) #y and x
-                            
-                            cv2.putText(color_image, "x:{0} y:{1} z:{2}".format(rww_x, rww_y, rww_z), (cx-100, cy-20), 0, 1, (255,182,193), 2)
-                        
+                            hand_x, hand_y, hand_z = get_coordinate(cy, cx) #y and x
+                            #cv2.putText(color_image, "x:{0} y:{1} z:{2}".format(rww_x, rww_y, rww_z), (cx-100, cy-20), 0, 1, (255,182,193), 2)
+                            obj_blue_score = get_score_attention(hand_x,hand_y,hand_z, x_world_blue, y_world_blue, z_world_blue)
+                            if obj_blue_score <= TRASHOLD:
+                                print("Is going to pick up blue obj")
+
                             # if score_depth < 0.8:
                             #     print("is NOT going to pick up")
                             # else:
