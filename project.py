@@ -2,7 +2,7 @@ import pyrealsense2 as rs
 import numpy as np
 import cv2
 import mediapipe as mp
-import time
+import math
 
 
 # Adding bounds for colors
@@ -44,20 +44,8 @@ def draw_rectangle(mask_color, frame):
         
 
 # Get an attention score_depth
-# def get_score_attention(hand_distance, obj_position, x_hand, x_obj):
-#     #get rid of some errors
-#     if hand_distance == 0:
-#         hand_distance = 20
-#     #get rid of some errors
-#     if obj_position == 0:
-#         obj_position = TRASHOLD        
-#     grader = int(MAX_DISTANCE)/int(obj_position)
-#     x_score = abs(int(x_hand)-int(x_obj))
-#     score_depth = int(MAX_DISTANCE)/(int(hand_distance)*grader)
-#     if x_score <= 1:
-#         x_score = 1 
-#     # Adjusting the importance of the score of the attention        
-#     return int*(((score_depth * 8)+ (x_score * 2)) /2)
+def get_score_attention(x_hand, y_hand, z_hand, x_obj, y_obj, z_obj):
+    score = math.sqrt((x_hand - x_obj)*(x_hand - x_obj) + (y_hand - y_obj)*(y_hand - y_obj)+ (z_hand - z_obj)*(z_hand - z_obj))
 
 
 # Get real world coordinates, not sure if in meter since depthmap is given in mm
