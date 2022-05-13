@@ -1,3 +1,4 @@
+from traceback import print_tb
 import pyrealsense2 as rs
 import numpy as np
 import cv2
@@ -27,21 +28,34 @@ green_upper_range = np.array([70, 255, 255])
 
 
 # TESTING PHASE
-# img = cv2.imread("image colors\colors.jpg")
-# img = cv2.resize(img, [600,400])
-# img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-# mask = cv2.inRange(img_hsv, lower_range, upper_range)
-# # draw roi
-# cn = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
-# if len(cn)>0:
-#     roi = max(cn, key=cv2.contourArea)
-#     xg, yg, wg, hg = cv2.boundingRect(roi)
-#     cv2.rectangle(img, (xg, yg), (xg + wg, yg + hg), (0,255,0), 3)
-# cv2.imshow("imga", img)
-# cv2.imshow("img", mask)
-# cv2.waitKey(0)
+# Don't forget to set the right path 
+img = cv2.imread("C:\\University\\Git stuff\\Intent_Prediction_ROB8\\colors.jpg")   
+# img = cv2.copyMakeBorder(img, 40, 40, 40, 40, cv2.BORDER_REPLICATE)
+img = cv2.resize(img, [600,400])
+img_hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV_FULL)
+mask = cv2.inRange(img_hsv, red_lower_range, red_upper_range)
+# draw roi
+cn, hierarchry = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+center_points = list()
+cv2.drawContours(img, cn, -1, (0,255,0), 3)
+i = 0
+print(len(cn))
+while i < len(cn):
+    M = cv2.moments(cn[i])
+    cx = int(M['m10']/M['m00'])
+    cy = int(M['m01']/M['m00'])
+    # center_points += [int(xg+np.floor(wg/2)), int(yg+np.floor(hg/2))]
+    center_points.append([cx, cy])
+    i+=1
+print(center_points)
+for center in center_points:
+    print(center)
+    cv2.circle(img, tuple(center), 0, 0, 5)
+cv2.imshow("imga", img)
+cv2.imshow("img", mask)
+cv2.waitKey(0)
 
-#cap = cv2.VideoCapture(0)
+# cap = cv2.VideoCapture(0)
 
 # Configure depth and color streams
 pipeline = rs.pipeline()
