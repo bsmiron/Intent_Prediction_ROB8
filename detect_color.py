@@ -14,17 +14,17 @@ def draw_rectangle(mask_color, frame):
         
     
 
-#blue
-blue_lower_range = np.array([110, 50, 50])
-blue_upper_range = np.array([130, 255, 255])  
-
 # red
-red_lower_range = np.array([169, 100, 100])
-red_upper_range = np.array([189, 255, 255])
+red_lower_range = np.array([0, 50, 100])
+red_upper_range = np.array([30, 255, 255])
 
 #green
-green_lower_range = np.array([50, 100, 100])
-green_upper_range = np.array([70, 255, 255])
+green_lower_range = np.array([40, 50, 75])
+green_upper_range = np.array([80, 255, 250])
+
+#blue
+blue_lower_range = np.array([90, 50, 50])
+blue_upper_range = np.array([150, 255, 255])  
 
 
 # TESTING PHASE
@@ -32,7 +32,7 @@ green_upper_range = np.array([70, 255, 255])
 img = cv2.imread("C:\\University\\Git stuff\\Intent_Prediction_ROB8\\colors.jpg")   
 # img = cv2.copyMakeBorder(img, 40, 40, 40, 40, cv2.BORDER_REPLICATE)
 img = cv2.resize(img, [600,400])
-img_hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV_FULL)
+img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV_FULL)
 mask = cv2.inRange(img_hsv, red_lower_range, red_upper_range)
 # draw roi
 cn, hierarchry = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -42,10 +42,11 @@ i = 0
 print(len(cn))
 while i < len(cn):
     M = cv2.moments(cn[i])
-    cx = int(M['m10']/M['m00'])
-    cy = int(M['m01']/M['m00'])
-    # center_points += [int(xg+np.floor(wg/2)), int(yg+np.floor(hg/2))]
-    center_points.append([cx, cy])
+    if (M['m00']!=0):
+        cx = int(M['m10']/M['m00'])
+        cy = int(M['m01']/M['m00'])
+        # center_points += [int(xg+np.floor(wg/2)), int(yg+np.floor(hg/2))]
+        center_points.append([cx, cy])
     i+=1
 print(center_points)
 for center in center_points:
