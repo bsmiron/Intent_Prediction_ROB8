@@ -6,19 +6,19 @@ import math
 import time
 
 
-# Adding bounds for colors
-
-#blue
-blue_lower_range = np.array([110, 50, 50])
-blue_upper_range = np.array([130, 255, 255])  
+# Adding bounds for colors goes from RED ->>> GREEN ->>> BLUE
 
 # red
-red_lower_range = np.array([169, 100, 100])
-red_upper_range = np.array([189, 255, 255])
+red_lower_range = np.array([0, 50, 50])
+red_upper_range = np.array([10, 255, 255])
 
 #green
-green_lower_range = np.array([50, 100, 100])
-green_upper_range = np.array([70, 255, 255])
+green_lower_range = np.array([50, 100, 255])
+green_upper_range = np.array([80, 255, 255])
+
+#blue
+blue_lower_range = np.array([140, 50, 50])
+blue_upper_range = np.array([180, 255, 255])  
 
 FX = 386.953
 FY = 386.953
@@ -142,7 +142,7 @@ try:
 
 ##################################  Inserting part of the detect_color and getting 3D coordinates ########################################################
        
-        frame_hsv = cv2.cvtColor(color_image, cv2.COLOR_BGR2HSV)
+        frame_hsv = cv2.cvtColor(color_image, cv2.COLOR_RGB2HSV)
 
         x_blue, y_blue, z_blue = get_color(frame_hsv, blue_lower_range, blue_upper_range)
         x_red, y_red, z_red = get_color(frame_hsv, red_lower_range, red_upper_range)
@@ -208,7 +208,7 @@ try:
                                         max(obj_green_score, obj_red_score)
                                         if max == obj_green_score:
                                             ur5_coordinates = x_green, y_green, z_green
-                                            time.sleep(15)
+                                            time.sleep(15) # wait 15 seconds
                                             ok = 0
                                         else:
                                             ur5_coordinates = x_red, y_red, z_red
@@ -236,15 +236,6 @@ try:
                                             ur5_coordinates = x_red, y_red, z_red
                                             time.sleep(15)
                                             ok = 0
-
-
-                            # if obj_blue_score <= TRASHOLD:
-                                # print("Is going to pick up blue obj")
-
-                            # if score_depth < 0.8:
-                            #     print("is NOT going to pick up")
-                            # else:
-                            #     print("IS GOING TO PICK UP")
 
         # If depth and color resolutions are different, resize color image to match depth image for display
         if depth_colormap_dim != color_colormap_dim:
