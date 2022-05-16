@@ -193,7 +193,17 @@ try:
                             # distance_lm = distance_depth(cx,cy)
                             hand_x, hand_y, hand_z = get_coordinate(cy, cx) #y and x
                             #cv2.putText(color_image, "x:{0} y:{1} z:{2}".format(rww_x, rww_y, rww_z), (cx-100, cy-20), 0, 1, (255,182,193), 2)
-                            # obj_blue_score = get_score_attention(hand_x,hand_y,hand_z, x_world_blue, y_world_blue, z_world_blue)
+                            obj_blue_score = get_score_attention(hand_x,hand_y,hand_z, x_blue, y_blue, z_blue)
+                            obj_red_score = get_score_attention(hand_x,hand_y,hand_z, x_red, y_red, z_red)
+                            obj_green_score = get_score_attention(hand_x,hand_y,hand_z, x_green, y_green, z_green)
+                            if (obj_blue_score < obj_red_score) and (obj_blue_score < obj_green_score):
+                                print("Obj blue")
+                            elif (obj_red_score < obj_blue_score) and (obj_red_score < obj_green_score):
+                                print("obj red")
+                            else:
+                                print("obj green")
+
+
                             # if obj_blue_score <= TRASHOLD:
                                 # print("Is going to pick up blue obj")
 
