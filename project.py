@@ -35,17 +35,31 @@ MAX_DISTANCE = 200
 TRASHOLD = 20
 
 # Detecting objects based on colors
-def draw_rectangle(mask_color, frame):
-    x_middle = 0 
-    y_middle = 0
-    cn = cv2.findContours(mask_color, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
-    if len(cn)>0:
-        roi = max(cn, key=cv2.contourArea)
-        xg, yg, wg, hg = cv2.boundingRect(roi)
-        cv2.rectangle(frame, (xg, yg), (xg + wg, yg + hg), (0,255,0), 3)
-        x_middle = int((xg + xg + wg) / 2)
-        y_middle = int((yg + yg + hg) / 2 )
-    return x_middle, y_middle
+def get_color(img_hsv, lower, upper):
+    mask = cv2.inRange(img_hsv, lower, upper)
+    cn, hierarchry = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    center_points = list()
+    cv2.drawContours(color_image, cn, -1, (0,255,0), 3)
+    i = 0
+    x = 0
+    y = 0
+    z = 0
+     # print(len(cn))
+    while i < len(cn):
+        M = cv2.moments(cn[i])
+        if (M['m00']!=0):
+            cx = int(M['m10']/M['m00'])
+            cy = int(M['m01']/M['m00'])
+            # center_points += [int(xg+np.floor(wg/2)), int(yg+np.floor(hg/2))]
+            center_points.append([cx, cy])
+            x, y, z = get_coordinate(cy,cx)
+        i+=1
+    # print(center_points)
+    for center in center_points:
+        # print(center)
+        cv2.circle(color_image, tuple(center), 0, 0, 5)
+    return x, y, z
+
         
 
 # Get an attention score_depth
@@ -124,42 +138,38 @@ try:
         color_colormap_dim = color_image.shape
 
 
-#######################################  Inserting part of the detect_color #####################################################################
+##################################  Inserting part of the detect_color and getting 3D coordinates ########################################################
        
         frame_hsv = cv2.cvtColor(color_image, cv2.COLOR_BGR2HSV)
 
-
-        mask_blue = cv2.inRange(frame_hsv, blue_lower_range, blue_upper_range)
-        mask_red = cv2.inRange(frame_hsv, red_lower_range, red_upper_range)
-        mask_green = cv2.inRange(frame_hsv, green_lower_range, green_upper_range)
-
-        x_blue, y_blue = draw_rectangle(mask_blue, color_image)
-        x_red, y_red = draw_rectangle(mask_red, color_image)
-        x_green, y_green =draw_rectangle(mask_green, color_image)
+        x_blue, y_blue, z_blue = get_color(frame_hsv, blue_lower_range, blue_upper_range)
+        x_red, y_red, z_red = get_color(frame_hsv, red_lower_range, red_upper_range)
+        x_green, y_green, z_green = get_color(frame_hsv, green_lower_range, green_upper_range)
+      
         
 ############################################### Get 3D coordinates #####################################################################
 
-        x_world_blue, y_world_blue, z_world_blue = get_coordinate(y_blue, x_blue)
-        x_world_red, y_world_red, z_world_red = get_coordinate(y_red, x_red)
-        x_world_green, y_world_green, z_world_green = get_coordinate(y_green, x_green)
+        # x_world_blue, y_world_blue, z_world_blue = get_coordinate(y_blue, x_blue)
+        # x_world_red, y_world_red, z_world_red = get_coordinate(y_red, x_red)
+        # x_world_green, y_world_green, z_world_green = get_coordinate(y_green, x_green)
 
 
 ############################################## Predefined Points #####################################################################
 
-        # Test zone
-        test_x, test_y, test_z = get_coordinate(420, 350)
-        cv2.circle(color_image, (420, 350), 5, (255,0,.0), 2, cv2.FILLED)
-        cv2.putText(color_image, "zobj2:{}".format(test_z), (420-100, 350-20), 0, 1, (255,182,193), 2)
+        # # Test zone
+        # test_x, test_y, test_z = get_coordinate(420, 350)
+        # cv2.circle(color_image, (420, 350), 5, (255,0,.0), 2, cv2.FILLED)
+        # cv2.putText(color_image, "zobj2:{}".format(test_z), (420-100, 350-20), 0, 1, (255,182,193), 2)
 
-        # Print real-world coordinates of a given point/s
-        # distance_roi = distance_depth(309, 408)
+        # # Print real-world coordinates of a given point/s
+        # # distance_roi = distance_depth(309, 408)
         
         
-        # Drawing ROI for cup and find the distance in centimeter
-        rw_x, rw_y, rw_z = get_coordinate(250, 350)
-        # cv2.rectangle(color_image, (170,340), (448,477), (0,0,255), 4) 
-        cv2.circle(color_image, (250, 350), 5, (255,0,.0), 2, cv2.FILLED)
-        cv2.putText(color_image, "zobj1:{}".format(rw_z), (250-100, 350-20), 0, 1, (255,182,193), 2)
+        # # Drawing ROI for cup and find the distance in centimeter
+        # rw_x, rw_y, rw_z = get_coordinate(250, 350)
+        # # cv2.rectangle(color_image, (170,340), (448,477), (0,0,255), 4) 
+        # cv2.circle(color_image, (250, 350), 5, (255,0,.0), 2, cv2.FILLED)
+        # cv2.putText(color_image, "zobj1:{}".format(rw_z), (250-100, 350-20), 0, 1, (255,182,193), 2)
 
 
 ############################################# Hand landmarks/Hand detection ################################################################
@@ -183,9 +193,9 @@ try:
                             # distance_lm = distance_depth(cx,cy)
                             hand_x, hand_y, hand_z = get_coordinate(cy, cx) #y and x
                             #cv2.putText(color_image, "x:{0} y:{1} z:{2}".format(rww_x, rww_y, rww_z), (cx-100, cy-20), 0, 1, (255,182,193), 2)
-                            obj_blue_score = get_score_attention(hand_x,hand_y,hand_z, x_world_blue, y_world_blue, z_world_blue)
-                            if obj_blue_score <= TRASHOLD:
-                                print("Is going to pick up blue obj")
+                            # obj_blue_score = get_score_attention(hand_x,hand_y,hand_z, x_world_blue, y_world_blue, z_world_blue)
+                            # if obj_blue_score <= TRASHOLD:
+                                # print("Is going to pick up blue obj")
 
                             # if score_depth < 0.8:
                             #     print("is NOT going to pick up")
