@@ -126,7 +126,7 @@ try:
 
 #######################################  Inserting part of the detect_color #####################################################################
        
-        frame_hsv = cv2.cvtColor(color_image, cv2.COLOR_BGR2HSV)
+        frame_hsv = cv2.cvtColor(color_image, cv2.COLOR_RGB2HSV)
 
 
         mask_blue = cv2.inRange(frame_hsv, blue_lower_range, blue_upper_range)
@@ -185,7 +185,7 @@ try:
                             #cv2.putText(color_image, "x:{0} y:{1} z:{2}".format(rww_x, rww_y, rww_z), (cx-100, cy-20), 0, 1, (255,182,193), 2)
                             obj_blue_score = get_score_attention(hand_x,hand_y,hand_z, x_world_blue, y_world_blue, z_world_blue)
                             if obj_blue_score <= TRASHOLD:
-                                print("Is going to pick up blue obj")
+                                print("Is going to pick up blue")
 
                             # if score_depth < 0.8:
                             #     print("is NOT going to pick up")
