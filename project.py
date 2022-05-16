@@ -3,6 +3,7 @@ import numpy as np
 import cv2
 import mediapipe as mp
 import math
+import time
 
 
 # Adding bounds for colors
@@ -52,7 +53,7 @@ def get_color(img_hsv, lower, upper):
             cy = int(M['m01']/M['m00'])
             # center_points += [int(xg+np.floor(wg/2)), int(yg+np.floor(hg/2))]
             center_points.append([cx, cy])
-            x, y, z = get_coordinate(cy,cx)
+            x, y, z = get_coordinate(cx,cy)
         i+=1
     # print(center_points)
     for center in center_points:
@@ -65,6 +66,7 @@ def get_color(img_hsv, lower, upper):
 # Get an attention score_depth
 def get_score_attention(x_hand, y_hand, z_hand, x_obj, y_obj, z_obj):
     score = math.sqrt((x_hand - x_obj)*(x_hand - x_obj) + (y_hand - y_obj)*(y_hand - y_obj)+ (z_hand - z_obj)*(z_hand - z_obj))
+    return score
 
 
 # Get real world coordinates, not sure if in meter since depthmap is given in mm
@@ -196,12 +198,44 @@ try:
                             obj_blue_score = get_score_attention(hand_x,hand_y,hand_z, x_blue, y_blue, z_blue)
                             obj_red_score = get_score_attention(hand_x,hand_y,hand_z, x_red, y_red, z_red)
                             obj_green_score = get_score_attention(hand_x,hand_y,hand_z, x_green, y_green, z_green)
-                            if (obj_blue_score < obj_red_score) and (obj_blue_score < obj_green_score):
-                                print("Obj blue")
-                            elif (obj_red_score < obj_blue_score) and (obj_red_score < obj_green_score):
-                                print("obj red")
-                            else:
-                                print("obj green")
+
+############################################ Intent Prediction and sending UR5 Coordiantes ##########################################       
+                            if min(obj_blue_score, obj_green_score, obj_red_score) == TRASHOLD:
+                                ok = 1
+                                while ok == 1:                 
+                                    if (obj_blue_score < obj_red_score) and (obj_blue_score < obj_green_score):
+                                        print("Obj blue")
+                                        max(obj_green_score, obj_red_score)
+                                        if max == obj_green_score:
+                                            ur5_coordinates = x_green, y_green, z_green
+                                            time.sleep(15)
+                                            ok = 0
+                                        else:
+                                            ur5_coordinates = x_red, y_red, z_red
+                                            time.sleep(15)
+                                            ok = 0
+                                    elif (obj_red_score < obj_blue_score) and (obj_red_score < obj_green_score):
+                                        print("obj red")
+                                        max(obj_green_score, obj_blue_score)
+                                        if max == obj_green_score:
+                                            ur5_coordinates = x_green, y_green, z_green
+                                            time.sleep(15)
+                                            ok = 0
+                                        else:
+                                            ur5_coordinates = x_blue, y_blue, z_blue
+                                            time.sleep(15)
+                                            ok = 0
+                                    else:
+                                        print("obj green")
+                                        max(obj_blue_score, obj_red_score)
+                                        if max == obj_blue_score:
+                                            ur5_coordinates = x_blue, y_blue, z_blue
+                                            time.sleep(15)
+                                            ok = 0
+                                        else:
+                                            ur5_coordinates = x_red, y_red, z_red
+                                            time.sleep(15)
+                                            ok = 0
 
 
                             # if obj_blue_score <= TRASHOLD:
