@@ -8,8 +8,12 @@ red_lower_range = np.array([0, 50, 50])
 red_upper_range = np.array([10, 255, 255])
 
 # orange
-orange_lower_range = np.array([0, 50, 50])
-orange_upper_range = np.array([10, 255, 255])
+orange_lower_range = np.array([10, 50, 50])
+orange_upper_range = np.array([20, 255, 255])
+
+# yellow
+yellow_lower_range = np.array([30, 50, 50])
+yellow_upper_range = np.array([40, 255, 255])
 
 #green
 green_lower_range = np.array([50, 100, 100])
@@ -50,12 +54,14 @@ img = cv2.imread("image_colors/colors.jpg")
 img = cv2.copyMakeBorder(img, 40, 40, 40, 40, cv2.BORDER_REPLICATE)
 img = cv2.resize(img, [600,400])
 img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV_FULL)
-get_color( img_hsv, red_lower_range, red_upper_range)
-get_color( img_hsv, blue_lower_range, blue_upper_range)
-get_color( img_hsv, green_lower_range, green_upper_range)
-# get_color(img_hsv, blue_lower_range, blue_upper_range)
+
+
+# get_color( img_hsv, red_lower_range, red_upper_range)
+# get_color( img_hsv, blue_lower_range, blue_upper_range)
+# get_color( img_hsv, green_lower_range, green_upper_range)
+get_color(img_hsv, yellow_lower_range, yellow_upper_range)
 cv2.imshow("imga", img)
-# cv2.imshow("img", mask)
+
 cv2.waitKey(0)
 
 '''

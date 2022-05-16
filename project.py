@@ -12,13 +12,21 @@ import time
 red_lower_range = np.array([0, 50, 50])
 red_upper_range = np.array([10, 255, 255])
 
-#green
-green_lower_range = np.array([50, 100, 255])
+# orange
+orange_lower_range = np.array([10, 50, 50])
+orange_upper_range = np.array([20, 255, 255])
+
+# yellow
+yellow_lower_range = np.array([30, 50, 50])
+yellow_upper_range = np.array([40, 255, 255])
+
+# green
+green_lower_range = np.array([50, 100, 100])
 green_upper_range = np.array([80, 255, 255])
 
-#blue
+# blue 140 - 180
 blue_lower_range = np.array([140, 50, 50])
-blue_upper_range = np.array([180, 255, 255])  
+blue_upper_range = np.array([180, 255, 255])   
 
 FX = 386.953
 FY = 386.953
@@ -140,9 +148,9 @@ try:
         color_colormap_dim = color_image.shape
 
 
-##################################  Inserting part of the detect_color and getting 3D coordinates ########################################################
+################################## Inserting part of the detect_color and getting 3D coordinates ########################################################
        
-        frame_hsv = cv2.cvtColor(color_image, cv2.COLOR_RGB2HSV)
+        frame_hsv = cv2.cvtColor(color_image, cv2.COLOR_BGR2HSV)
 
         x_blue, y_blue, z_blue = get_color(frame_hsv, blue_lower_range, blue_upper_range)
         x_red, y_red, z_red = get_color(frame_hsv, red_lower_range, red_upper_range)
