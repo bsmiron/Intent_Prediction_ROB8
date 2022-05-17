@@ -37,6 +37,12 @@ FY = 386.953
 PPX = 319.307
 PPY = 241.853
 
+# test if picked 
+# 0 = no
+#         0   1       2        3    4     5
+#        red,orange, yellow, green, blue ,purple
+picked = [0,   0,      0,      0,    0,    0]
+
 CamMatrix = np.asarray([[FX, 0.0, PPX, 0],
             		    [0.0, FY, PPY, 0],
              		    [0.0, 0.0, 1.0, 0]])
@@ -225,44 +231,54 @@ try:
                                 while ok == 1:    
 
                                     #BLUE             
-                                    if (obj_blue_score < obj_red_score) and (obj_blue_score < obj_green_score)and (obj_blue_score < obj_yellow_score) and (obj_blue_score < obj_orange_score) and (obj_blue_score < obj_purple_score):
+                                    if (obj_blue_score < obj_red_score) and (obj_blue_score < obj_green_score)and (obj_blue_score < obj_yellow_score) and (obj_blue_score < obj_orange_score) and (obj_blue_score < obj_purple_score) and picked[4] == 0:
                                         print("Obj blue")
+                                        picked[4] = 1
                                         max = max(obj_green_score, obj_red_score, obj_yellow_score, obj_orange_score, obj_purple_score)
-                                        if max == obj_green_score:
+                                        if max == obj_green_score and picked[3] == 0:
                                             ur5_coordinates = x_green, y_green, z_green
                                             time.sleep(15) # wait 15 seconds
+                                            picked[3] = 1
                                             ok = 0
-                                        elif max == obj_red_score:
+                                        elif max == obj_red_score and picked[0] == 0:
                                             ur5_coordinates = x_red, y_red, z_red
                                             time.sleep(15)
+                                            picked[0] = 1
                                             ok = 0
-                                        elif max == obj_yellow_score:
+                                        elif max == obj_yellow_score and picked[2] == 0:
                                             ur5_coordinates = x_yellow, y_yellow, z_yellow
                                             time.sleep(15)
+                                            picked[2] = 1
                                             ok = 0
-                                        elif max == obj_orange_score:
+                                        elif max == obj_orange_score and picked[1] == 0:
                                             ur5_coordinates = x_orange, y_orange, z_orange
                                             time.sleep(15)
+                                            picked[1] = 1
                                             ok = 0
-                                        elif max == obj_purple_score:
+                                        elif max == obj_purple_score and picked[5] == 0:
                                             ur5_coordinates = x_purple, y_purple, z_purple
                                             time.sleep(15)
+                                            picked[5] = 1
                                             ok = 0
                                     #RED
-                                    elif (obj_red_score < obj_blue_score) and (obj_red_score < obj_green_score) and (obj_red_score < obj_yellow_score) and (obj_red_score < obj_orange_score) and (obj_red_score < obj_purple_score):
+                                    elif (obj_red_score < obj_blue_score) and (obj_red_score < obj_green_score) and (obj_red_score < obj_yellow_score) and (obj_red_score < obj_orange_score) and (obj_red_score < obj_purple_score) and picked[0] == 0:
                                         print("obj red")
+                                        picked[0]= 1
                                         max = max(obj_green_score, obj_blue_score, obj_yellow_score, obj_orange_score, obj_purple_score)
                                         if max == obj_green_score:
                                             ur5_coordinates = x_green, y_green, z_green
                                             time.sleep(15) # wait 15 seconds
+                                            picked[3] = 1
                                             ok = 0
                                         elif max == obj_blue_score:
                                             ur5_coordinates = x_blue, y_blue, z_blue
                                             time.sleep(15)
+                                            picked[4] = 1
                                             ok = 0
                                         elif max == obj_yellow_score:
                                             ur5_coordinates = x_yellow, y_yellow, z_yellow
                                             time.sleep(15)
+                                            picked[2] = 1
                                             ok = 0
                                         elif max == obj_orange_score:
                                             ur5_coordinates = x_orange, y_orange, z_orange
@@ -271,6 +287,7 @@ try:
                                         elif max == obj_purple_score:
                                             ur5_coordinates = x_purple, y_purple, z_purple
                                             time.sleep(15)
+                                            picked[5] = 1
                                             ok = 0
                                     #Orange
                                     elif (obj_orange_score < obj_blue_score) and (obj_orange_score < obj_green_score) and (obj_orange_score < obj_yellow_score) and (obj_orange_score < obj_red_score) and (obj_orange_score < obj_purple_score):
@@ -279,22 +296,27 @@ try:
                                         if max == obj_green_score:
                                             ur5_coordinates = x_green, y_green, z_green
                                             time.sleep(15) # wait 15 seconds
+                                            picked[3] = 1
                                             ok = 0
                                         elif max == obj_blue_score:
                                             ur5_coordinates = x_blue, y_blue, z_blue
                                             time.sleep(15)
+                                            picked[4] = 1
                                             ok = 0
                                         elif max == obj_yellow_score:
                                             ur5_coordinates = x_yellow, y_yellow, z_yellow
                                             time.sleep(15)
+                                            picked[2] = 1
                                             ok = 0
                                         elif max == obj_red_score:
                                             ur5_coordinates = x_red, y_red, z_red
                                             time.sleep(15)
+                                            picked[0] = 1
                                             ok = 0
                                         elif max == obj_purple_score:
                                             ur5_coordinates = x_purple, y_purple, z_purple
                                             time.sleep(15)
+                                            picked[5] = 1
                                             ok = 0
                                     #Yellow
                                     elif (obj_yellow_score < obj_blue_score) and (obj_yellow_score < obj_green_score) and (obj_yellow_score < obj_orange_score) and (obj_yellow_score < obj_red_score) and (obj_yellow_score < obj_purple_score):
@@ -303,22 +325,27 @@ try:
                                         if max == obj_green_score:
                                             ur5_coordinates = x_green, y_green, z_green
                                             time.sleep(15) # wait 15 seconds
+                                            picked[3] = 1
                                             ok = 0
                                         elif max == obj_blue_score:
                                             ur5_coordinates = x_blue, y_blue, z_blue
                                             time.sleep(15)
+                                            picked[4] = 1
                                             ok = 0
                                         elif max == obj_orange_score:
                                             ur5_coordinates = x_orange, y_orange, z_orange
                                             time.sleep(15)
+                                            picked[1] = 1
                                             ok = 0
                                         elif max == obj_red_score:
                                             ur5_coordinates = x_red, y_red, z_red
                                             time.sleep(15)
+                                            picked[0] = 1
                                             ok = 0
                                         elif max == obj_purple_score:
                                             ur5_coordinates = x_purple, y_purple, z_purple
                                             time.sleep(15)
+                                            picked[5] = 1
                                             ok = 0
                                     #Purple
                                     elif (obj_purple_score < obj_blue_score) and (obj_purple_score < obj_green_score) and (obj_purple_score < obj_orange_score) and (obj_purple_score < obj_red_score) and (obj_purple_score < obj_yellow_score):
@@ -327,47 +354,62 @@ try:
                                         if max == obj_green_score:
                                             ur5_coordinates = x_green, y_green, z_green
                                             time.sleep(15) # wait 15 seconds
+                                            picked[3] = 1
                                             ok = 0
                                         elif max == obj_blue_score:
                                             ur5_coordinates = x_blue, y_blue, z_blue
                                             time.sleep(15)
+                                            picked[4] = 1
                                             ok = 0
                                         elif max == obj_orange_score:
                                             ur5_coordinates = x_orange, y_orange, z_orange
                                             time.sleep(15)
+                                            picked[1] = 1
                                             ok = 0
                                         elif max == obj_red_score:
                                             ur5_coordinates = x_red, y_red, z_red
                                             time.sleep(15)
+                                            picked[0] = 1
                                             ok = 0
                                         elif max == obj_yellow_score:
                                             ur5_coordinates = x_yellow, y_yellow, z_yellow
                                             time.sleep(15)
+                                            picked[2] = 1
                                             ok = 0
                                     #GREEN
-                                    else:
+                                    elif (obj_green_score < obj_blue_score) and (obj_green_score < obj_green_score) and (obj_green_score < obj_orange_score) and (obj_green_score < obj_red_score) and (obj_green_score < obj_yellow_score) and picked[3]==0:
                                         print("obj green")
-                                        max = max(obj_purple_score, obj_blue_score, obj_orange_score, obj_red_score, obj_yellow_score)
+                                        max = max(obj_purple_score, obj_blue_score, obj_orange_score, obj_red_score, obj_yellow_score) 
+                                        picked[3] = 1
                                         if max == obj_purple_score:
                                             ur5_coordinates = x_purple, y_purple, z_purple
                                             time.sleep(15)
+                                            picked[5] = 0
                                             ok = 0
                                         elif max == obj_blue_score:
                                             ur5_coordinates = x_blue, y_blue, z_blue
                                             time.sleep(15)
+                                            picked[4] = 0
                                             ok = 0
                                         elif max == obj_orange_score:
                                             ur5_coordinates = x_orange, y_orange, z_orange
                                             time.sleep(15)
+                                            picked[1] = 0
                                             ok = 0
                                         elif max == obj_red_score:
                                             ur5_coordinates = x_red, y_red, z_red
                                             time.sleep(15)
+                                            picked[0] = 0
                                             ok = 0
                                         elif max == obj_yellow_score:
                                             ur5_coordinates = x_yellow, y_yellow, z_yellow
                                             time.sleep(15)
+                                            picked[2] = 0
                                             ok = 0
+
+                                    else: 
+                                        print("Pyramid is done")
+                                        ok = 0
 
         # If depth and color resolutions are different, resize color image to match depth image for display
         if depth_colormap_dim != color_colormap_dim:
