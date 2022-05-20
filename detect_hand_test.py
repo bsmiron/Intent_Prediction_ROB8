@@ -2,56 +2,6 @@ import pyrealsense2 as rs
 import numpy as np
 import cv2
 import mediapipe as mp
-import math
-import time
-# red
-red_lower_range = np.array([0, 50, 50])
-red_upper_range = np.array([10, 255, 255])
-
-# orange
-orange_lower_range = np.array([10, 50, 50])
-orange_upper_range = np.array([20, 255, 255])
-
-# yellow
-yellow_lower_range = np.array([21, 50, 50])
-yellow_upper_range = np.array([49, 255, 255])
-
-# green
-green_lower_range = np.array([50, 100, 100])
-green_upper_range = np.array([80, 255, 255])
-
-# blue 140 - 180
-blue_lower_range = np.array([81, 50, 50])
-blue_upper_range = np.array([180, 255, 255])   
-
-# purple
-purple_lower_range = np.array([200, 75, 100])
-purple_upper_range = np.array([240, 255, 255])
-
-def get_color(img_hsv, lower, upper):
-    mask = cv2.inRange(img_hsv, lower, upper)
-    cn, hierarchry = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    center_points = list()
-    cv2.drawContours(color_image, cn, -1, (0,255,0), 3)
-    i = 0
-    x = 0
-    y = 0
-    z = 0
-     # print(len(cn))
-    while i < len(cn):
-        M = cv2.moments(cn[i])
-        if (M['m00']!=0):
-            cx = int(M['m10']/M['m00'])
-            cy = int(M['m01']/M['m00'])
-            # center_points += [int(xg+np.floor(wg/2)), int(yg+np.floor(hg/2))]
-            center_points.append([cx, cy])
-        i+=1
-    # print(center_points)
-    for center in center_points:
-        # print(center)
-        cv2.circle(color_image, tuple(center), 0, 0, 5)
-  
-
 
 # Configure depth and color streams
 pipeline = rs.pipeline()
@@ -97,19 +47,24 @@ try:
 
         # Apply colormap on depth image (image must be converted to 8-bit per pixel first)
         depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha = 0.03), cv2.COLORMAP_JET)
+        mp_hand = mp.solutions.hands
+        hands = mp_hand.Hands(max_num_hands=1)
+        mp.draw = mp.solutions.drawing_utils
+        results = hands.process(color_image)
+    
+        # Drawing the landmark and find the distance centimeter
+        if results.multi_hand_landmarks:
+                for handLms in results.multi_hand_landmarks:
+                    for id, lm in enumerate(handLms.landmark):
+                        #print(id,lm) id = type of landmark; lm coordinates of the landmark
+                        h, w, c = color_image.shape
+                        cx, cy = int(lm.x *w), int(lm.y*h)
+                        
+                        if id == 9:
+                            cv2.circle(color_image, (cx,cy), 10, (255,0,255), cv2.FILLED)
 
         depth_colormap_dim = depth_colormap.shape
         color_colormap_dim = color_image.shape
-################################## Inserting part of the detect_color and getting 3D coordinates ########################################################
-       
-        frame_hsv = cv2.cvtColor(color_image, cv2.COLOR_BGR2HSV)
-
-        get_color(frame_hsv, blue_lower_range, blue_upper_range)
-        get_color(frame_hsv, red_lower_range, red_upper_range)
-        get_color(frame_hsv, green_lower_range, green_upper_range)
-        get_color(frame_hsv, purple_lower_range, purple_upper_range)
-        get_color(frame_hsv, yellow_lower_range, yellow_upper_range)
-
         if depth_colormap_dim != color_colormap_dim:
             resized_color_image = cv2.resize(color_image, dsize=(depth_colormap_dim[1], depth_colormap_dim[0]), interpolation=cv2.INTER_AREA)
             images = np.hstack((resized_color_image, depth_colormap))
