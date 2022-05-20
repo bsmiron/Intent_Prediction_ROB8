@@ -161,7 +161,7 @@ try:
         key = cv2.waitKey(30)
         e2 = cv2.getTickCount()
         t = (e2 - e1) / cv2.getTickFrequency()
-        cv2.imwrite(f"image_colors/test_pictures_2022_05_20/detect_color_test/test4/detect_hand_test_{t}.png", images)
+        cv2.imwrite(f"image_colors/test_pictures_2022_05_20/detect_color_test/test6/detect_hand_test_{t}.png", images)
         if t>30: # change it to record what length of video you are interested in
             print("Done!")
             break

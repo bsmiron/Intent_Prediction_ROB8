@@ -83,7 +83,7 @@ try:
         # Apply colormap on depth image (image must be converted to 8-bit per pixel first)
         depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha = 0.03), cv2.COLORMAP_JET)
         mp_hand = mp.solutions.hands
-        hands = mp_hand.Hands(max_num_hands=1)
+        hands = mp_hand.Hands(max_num_hands=1) # number of hands
         mp.draw = mp.solutions.drawing_utils
         results = hands.process(color_image)
     
@@ -111,8 +111,8 @@ try:
         cv2.imshow('Project', images)
         e2 = cv2.getTickCount()
         t = (e2 - e1) / cv2.getTickFrequency()
-        cv2.imwrite(f'image_colors/test_pictures_2022_05_20/detect_hand_test/detect_hand_test_{t}.png', images)
-        if t>30: # change it to record what length of video you are interested in
+        cv2.imwrite(f'image_colors/test_pictures_2022_05_20/detect_hand_test/test9/detect_hand_test_{t}.png', images)
+        if t>10: # change it to record what length of video you are interested in
             print("Done!")
             break
         key = cv2.waitKey(30)
