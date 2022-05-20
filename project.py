@@ -53,6 +53,8 @@ fPixels = CamMatrix[0,0]
 MAX_DISTANCE = 200
 TRASHOLD = 20
 
+#if obj is higher than pixel 
+
 # Detecting objects based on colors
 def get_color(img_hsv, lower, upper):
     mask = cv2.inRange(img_hsv, lower, upper)

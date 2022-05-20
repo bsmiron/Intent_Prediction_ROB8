@@ -37,9 +37,9 @@ def get_coordinate(pixel_y, pixel_x):
 # Configure depth and color streams
 pipeline = rs.pipeline()
 config = rs.config()
-config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
-config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
-config.enable_record_to_file('detect_hand_test.bag')
+# config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
+# config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+# config.enable_record_to_file('detect_hand_test.bag')
 
 # Get device product line for setting a supporting resolution
 pipeline_wrapper = rs.pipeline_wrapper(pipeline)
@@ -111,6 +111,7 @@ try:
         cv2.imshow('Project', images)
         e2 = cv2.getTickCount()
         t = (e2 - e1) / cv2.getTickFrequency()
+        cv2.imwrite(f'image_colors/test_pictures_2022_05_20/detect_hand_test/detect_hand_test_{t}.png', images)
         if t>30: # change it to record what length of video you are interested in
             print("Done!")
             break
