@@ -111,7 +111,7 @@ try:
         cv2.imshow('Project', images)
         e2 = cv2.getTickCount()
         t = (e2 - e1) / cv2.getTickFrequency()
-        cv2.imwrite(f'image_colors/test_pictures_2022_05_20/detect_hand_test/test9/detect_hand_test_{t}.png', images)
+        cv2.imwrite(f'image_colors/test_pictures_2022_05_20/pyramid_test/test8/detect_hand_test_{t}.png', images)
         if t>10: # change it to record what length of video you are interested in
             print("Done!")
             break
