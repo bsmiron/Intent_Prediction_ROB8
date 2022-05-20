@@ -3,6 +3,37 @@ import numpy as np
 import cv2
 import mediapipe as mp
 
+FX = 386.953
+FY = 386.953
+PPX = 319.307
+PPY = 241.853
+
+CamMatrix = np.asarray([[FX, 0.0, PPX, 0],
+            		    [0.0, FY, PPY, 0],
+             		    [0.0, 0.0, 1.0, 0]])
+
+
+fPixels = CamMatrix[0,0]
+
+# Get real world coordinates, not sure if in meter since depthmap is given in mm
+def get_coordinate(pixel_y, pixel_x):
+     
+    matrix = CamMatrix
+    u = int(pixel_x)
+    v = int(pixel_y)
+    #depth = depth_map
+
+    # Can substituate depth with depth_f and eliminate function distance_depth
+    depth_f = int(depth_image[pixel_x, pixel_y])/10 #this is in cmeters
+    
+
+    # X and Y might be in meters
+    X = depth_f*(u-matrix[0][2])/(matrix[0][0])
+    Y = depth_f*(v-matrix[1][2])/(matrix[1][1])
+    Z = depth_f
+    return [int(X), int(Y), int(Z)]
+
+
 # Configure depth and color streams
 pipeline = rs.pipeline()
 config = rs.config()
