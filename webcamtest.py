@@ -18,7 +18,7 @@ yellow_upper_range = np.array([49, 255, 255])
 
 # green
 green_lower_range = np.array([50, 50, 50])
-green_upper_range = np.array([100, 255, 255])
+green_upper_range = np.array([120, 255, 255])
 
 # blue 140 - 180
 blue_lower_range = np.array([140, 75, 50])
@@ -63,7 +63,7 @@ def get_color(img_hsv, lower, upper):
 
 # TESTING PHASE
 # Don't forget to set the right path 
-img = cv2.imread("image_colors/test_pictures_2022_05_21/data/data6.jpeg")   
+img = cv2.imread("image_colors/alberto/alberto1.png")   
 # img = cv2.copyMakeBorder(img, 40, 40, 40, 40, cv2.BORDER_REPLICATE)
 
 # scale_percent = 50 # percent of original size
@@ -75,16 +75,16 @@ img = cv2.imread("image_colors/test_pictures_2022_05_21/data/data6.jpeg")
 img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV_FULL)
 
 
-# get_color(img_hsv, red_lower_range, red_upper_range)
-# get_color(img_hsv, purple_lower_range, purple_upper_range)
-# get_color(img_hsv, green_lower_range, green_upper_range)
-# get_color(img_hsv, yellow_lower_range, yellow_upper_range)
-# get_color(img_hsv, blue_lower_range,blue_upper_range)
+get_color(img_hsv, red_lower_range, red_upper_range)
+get_color(img_hsv, purple_lower_range, purple_upper_range)
+get_color(img_hsv, green_lower_range, green_upper_range)
+get_color(img_hsv, yellow_lower_range, yellow_upper_range)
+get_color(img_hsv, blue_lower_range,blue_upper_range)
 get_color(img_hsv, orange_lower_range, orange_upper_range)
 cv2.imshow("imga", img)
 # print("detected red detected purple detected green detected yellow detected blue detected orange ")
 print("detected orange ")
-cv2.imwrite("image_colors/test_pictures_2022_05_21/results/data_color6.jpeg", img)
+cv2.imwrite("image_colors/alberto/alberto1_results.png", img)
 cv2.waitKey(0)
 
 '''

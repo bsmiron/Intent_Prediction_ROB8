@@ -12,6 +12,29 @@ def get_score_attention(x_hand, y_hand, z_hand, x_obj, y_obj, z_obj):
 #        red,orange, yellow, green, blue ,purple
 picked = [0,   0,      0,      0,    0,    0]
 
+# test if gaze is fixed on this objects 
+# 0 = no
+#         0   1       2        3    4     5
+#        red,orange, yellow, green, blue ,purple
+gaze =   [0,   0,      0,      0,    0,    0]
+
+what_color = input("On what color is the gazed fixed on? Choose between red, orange, yellow, green, blue, purple: ")
+
+if what_color == 'red':
+    gaze[0] = 1
+elif what_color == 'orange':
+    gaze[1] = 1
+elif what_color == 'yellow':
+    gaze[2] = 1
+elif what_color == 'green':
+    gaze[3] = 1
+elif what_color == 'blue':
+    gaze[4] = 1
+elif what_color == 'purple':
+    gaze[5] = 1
+else:
+    print('no fixed gaze')
+
 hand_x,hand_y,hand_z, = []
 x_blue, y_blue, z_blue = [] 
 x_red, y_red, z_red = []
@@ -27,6 +50,21 @@ obj_green_score = get_score_attention(hand_x,hand_y,hand_z, x_green, y_green, z_
 obj_orange_score = get_score_attention(hand_x, hand_y, hand_z, x_orange, y_orange, z_orange)
 obj_yellow_score = get_score_attention(hand_x, hand_y, hand_z, x_yellow, y_yellow, z_yellow)
 obj_purple_score = get_score_attention(hand_x, hand_y, hand_z, x_purple, y_purple, z_purple) 
+
+if what_color == 'red':
+    obj_red_score = obj_red_score + obj_red_score % 20
+elif what_color == 'orange':
+    obj_orange_score = obj_orange_score - obj_orange_score %20
+elif what_color == 'yellow':
+    obj_yellow_score = obj_yellow_score - obj_yellow_score % 20
+elif what_color == 'green':
+    obj_green_score = obj_green_score - obj_green_score %20
+elif what_color == 'blue':
+    obj_blue_score = obj_blue_score - obj_blue_score % 20
+elif what_color == 'purple':
+    obj_purple_score = obj_purple_score - obj_purple_score % 20
+else:
+    print('no fixed gaze')
 
 
  #BLUE             

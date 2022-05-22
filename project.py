@@ -6,6 +6,9 @@ import mediapipe as mp
 import math
 import time
 
+# Asking on what is the gazed fixed based on attention map
+what_color = input("On what color is the gazed fixed on? Choose between red, orange, yellow, green, blue, purple: ")
+
 
 # Adding bounds for colors goes from RED ->>> GREEN ->>> BLUE
 
@@ -237,6 +240,18 @@ try:
                             obj_orange_score = get_score_attention(hand_x, hand_y, hand_z, x_orange, y_orange, z_orange)
                             obj_yellow_score = get_score_attention(hand_x, hand_y, hand_z, x_yellow, y_yellow, z_yellow)
                             obj_purple_score = get_score_attention(hand_x, hand_y, hand_z, x_purple, y_purple, z_purple) 
+                            if what_color == 'red':
+                                obj_red_score = obj_red_score + obj_red_score % 20
+                            elif what_color == 'orange':
+                                obj_orange_score = obj_orange_score - obj_orange_score %20
+                            elif what_color == 'yellow':
+                                obj_yellow_score = obj_yellow_score - obj_yellow_score % 20
+                            elif what_color == 'green':
+                                obj_green_score = obj_green_score - obj_green_score %20
+                            elif what_color == 'blue':
+                                obj_blue_score = obj_blue_score - obj_blue_score % 20
+                            elif what_color == 'purple':
+                                obj_purple_score = obj_purple_score - obj_purple_score % 20
 
 ############################################ Intent Prediction and sending UR5 Coordiantes #################################################
 # ################################################# Decision Tree - If statements ######################################################
