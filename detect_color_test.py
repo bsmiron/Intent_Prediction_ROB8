@@ -68,7 +68,7 @@ def get_color(img_hsv, lower, upper):
     center_points = list()
     # area = cv2.contourArea(cn)
     # print(area)
-    # cv2.drawContours(color_image, cn, -1, (0,255,0), 3)
+    cv2.drawContours(color_image, cn, -1, (0,255,0), 3)
     i = 0
     x = 0
     y = 0
@@ -76,7 +76,8 @@ def get_color(img_hsv, lower, upper):
      # print(len(cn))
     while i < len(cn):
         M = cv2.moments(cn[i])
-        if (M['m00']!=0 and M['m00']>2000 and M['m00']<7000):
+        if (M['m00']!=0 and M['m00']>2000 and M['m00']<2500):
+            print(M['m00'])
             cv2.drawContours(color_image, cn, -1, (0,255,0), 3)
             cx = int(M['m10']/M['m00'])
             cy = int(M['m01']/M['m00'])
@@ -144,10 +145,10 @@ try:
         frame_hsv = cv2.cvtColor(color_image, cv2.COLOR_BGR2HSV)
 
         get_color(frame_hsv, blue_lower_range, blue_upper_range)
-        get_color(frame_hsv, red_lower_range, red_upper_range)
-        get_color(frame_hsv, green_lower_range, green_upper_range)
-        get_color(frame_hsv, purple_lower_range, purple_upper_range)
-        get_color(frame_hsv, yellow_lower_range, yellow_upper_range)
+        # get_color(frame_hsv, red_lower_range, red_upper_range)
+        # get_color(frame_hsv, green_lower_range, green_upper_range)
+        # get_color(frame_hsv, purple_lower_range, purple_upper_range)
+        # get_color(frame_hsv, yellow_lower_range, yellow_upper_range)
 
         if depth_colormap_dim != color_colormap_dim:
             resized_color_image = cv2.resize(color_image, dsize=(depth_colormap_dim[1], depth_colormap_dim[0]), interpolation=cv2.INTER_AREA)
@@ -161,10 +162,10 @@ try:
         key = cv2.waitKey(30)
         e2 = cv2.getTickCount()
         t = (e2 - e1) / cv2.getTickFrequency()
-        cv2.imwrite(f"image_colors/test_pictures_2022_05_20/detect_color_test/test6/detect_hand_test_{t}.png", images)
-        if t>30: # change it to record what length of video you are interested in
-            print("Done!")
-            break
+        # cv2.imwrite(f"image_colors/test_pictures_2022_05_20/detect_color_test/test6/detect_hand_test_{t}.png", images)
+        # if t>30: # change it to record what length of video you are interested in
+        #     print("Done!")
+        #     break
         
         # Esc button
         if key == 27:

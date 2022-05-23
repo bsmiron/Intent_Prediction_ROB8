@@ -5,15 +5,15 @@ import cv2
 
 # red
 red_lower_range = np.array([0, 50, 50])
-red_upper_range = np.array([10, 255, 255])
+red_upper_range = np.array([3, 255, 255])
 
 # orange
-orange_lower_range = np.array([11, 50, 50])
-orange_upper_range = np.array([20, 255, 255])
+orange_lower_range = np.array([14, 100, 50])
+orange_upper_range = np.array([16, 255, 255])
 
 # yellow
-yellow_lower_range = np.array([21, 50, 50])
-yellow_upper_range = np.array([49, 255, 255])
+yellow_lower_range = np.array([30, 100, 50])
+yellow_upper_range = np.array([34, 255, 255])
 
 
 # green
@@ -22,10 +22,10 @@ green_upper_range = np.array([120, 255, 255])
 
 # blue 140 - 180
 blue_lower_range = np.array([140, 75, 50])
-blue_upper_range = np.array([180, 255, 255])  
+blue_upper_range = np.array([155, 255, 255])  
 
 # purple
-purple_lower_range = np.array([190, 50, 50])
+purple_lower_range = np.array([180, 50, 50])
 purple_upper_range = np.array([240, 255, 255])  
 
 
@@ -49,8 +49,12 @@ def get_color(img_hsv, lower, upper):
     # elif lower == yellow_lower_range and upper ==yellow_upper_range:
     #     print("detected yellow ")
     while i < len(cn):
+        perimeter = cv2.arcLength(cn[i],True)
         M = cv2.moments(cn[i])
-        if (M['m00']!=0 and M['m00']>2000 and M['m00']<7000):
+        if (M['m00'] != 0 and perimeter>1000 and perimeter<1100):
+            # print(perimeter)
+            # if cv2.contourArea(cn[i]> 2000):
+            cv2.drawContours(img, cn, -1, (0,255,0), 3)
             cx = int(M['m10']/M['m00'])
             cy = int(M['m01']/M['m00'])
             # center_points += [int(xg+np.floor(wg/2)), int(yg+np.floor(hg/2))]
@@ -63,7 +67,7 @@ def get_color(img_hsv, lower, upper):
 
 # TESTING PHASE
 # Don't forget to set the right path 
-img = cv2.imread("image_colors/alberto/alberto1.png")   
+img = cv2.imread("image_colors/test_pictures_2022_05_23/data/test2.jpeg")   
 # img = cv2.copyMakeBorder(img, 40, 40, 40, 40, cv2.BORDER_REPLICATE)
 
 # scale_percent = 50 # percent of original size
@@ -75,16 +79,15 @@ img = cv2.imread("image_colors/alberto/alberto1.png")
 img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV_FULL)
 
 
-get_color(img_hsv, red_lower_range, red_upper_range)
-get_color(img_hsv, purple_lower_range, purple_upper_range)
-get_color(img_hsv, green_lower_range, green_upper_range)
-get_color(img_hsv, yellow_lower_range, yellow_upper_range)
-get_color(img_hsv, blue_lower_range,blue_upper_range)
+# get_color(img_hsv, red_lower_range, red_upper_range)
+# get_color(img_hsv, purple_lower_range, purple_upper_range)
+# get_color(img_hsv, green_lower_range, green_upper_range)
+# get_color(img_hsv, yellow_lower_range, yellow_upper_range)
+# get_color(img_hsv, blue_lower_range,blue_upper_range)
 get_color(img_hsv, orange_lower_range, orange_upper_range)
 cv2.imshow("imga", img)
 # print("detected red detected purple detected green detected yellow detected blue detected orange ")
-print("detected orange ")
-cv2.imwrite("image_colors/alberto/alberto1_results.png", img)
+cv2.imwrite("image_colors/test_pictures_2022_05_23/results/test_detect_sep_6.jpeg", img)
 cv2.waitKey(0)
 
 '''

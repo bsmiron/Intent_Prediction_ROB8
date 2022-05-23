@@ -1,4 +1,4 @@
-from asyncio.windows_events import NULL
+# from asyncio.windows_events import NULL
 import pyrealsense2 as rs
 import numpy as np
 import cv2
@@ -169,22 +169,22 @@ try:
         frame_hsv = cv2.cvtColor(color_image, cv2.COLOR_BGR2HSV)
 
         x_blue, y_blue, z_blue = get_color(frame_hsv, blue_lower_range, blue_upper_range)
-        if x_blue != NULL and y_blue != NULL and z_blue != NULL:
+        if x_blue != None and y_blue != None and z_blue != None:
             print(f"Object blue detected and has the coordinates x:{x_blue}, y:{y_blue}, z:{z_blue}")
         x_red, y_red, z_red = get_color(frame_hsv, red_lower_range, red_upper_range)
-        if x_red != NULL and y_red != NULL and z_red != NULL:
+        if x_red != None and y_red != None and z_red != None:
             print(f"Object red detected and has the coordinates x:{x_red}, y:{y_red}, z:{z_red}")
         x_green, y_green, z_green = get_color(frame_hsv, green_lower_range, green_upper_range)
-        if x_green != NULL and y_green != NULL and z_green != NULL:
+        if x_green != None and y_green != None and z_green != None:
             print(f"Object green detected and has the coordinates x:{x_green}, y:{y_green}, z:{z_green}")
         x_orange, y_orange, z_orange = get_color(frame_hsv, orange_lower_range, orange_upper_range)
-        if x_orange != NULL and y_orange != NULL and z_orange != NULL:
+        if x_orange != None and y_orange != None and z_orange != None:
             print(f"Object orange detected and has the coordinates x:{x_orange}, y:{y_orange}, z:{z_orange}")
         x_yellow, y_yellow, z_yellow = get_color(frame_hsv, yellow_lower_range, yellow_upper_range)
-        if x_yellow != NULL and y_yellow != NULL and z_blue != NULL:
+        if x_yellow != None and y_yellow != None and z_blue != None:
             print(f"Object yellow detected and has the coordinates x:{x_yellow}, y:{y_yellow}, z:{y_yellow}")
         x_purple , y_purple, z_purple = get_color(frame_hsv, purple_lower_range, purple_upper_range)
-        if x_purple != NULL and y_purple != NULL and z_purple != NULL:
+        if x_purple != None and y_purple != None and z_purple != None:
             print(f"Object purple detected and has the coordinates x:{x_purple}, y:{y_purple}, z:{z_purple}")
       
         

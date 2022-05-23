@@ -2,6 +2,7 @@ import pyrealsense2 as rs
 import numpy as np
 import cv2
 import mediapipe as mp
+import math
 
 FX = 386.953
 FY = 386.953
@@ -14,6 +15,12 @@ CamMatrix = np.asarray([[FX, 0.0, PPX, 0],
 
 
 fPixels = CamMatrix[0,0]
+
+# Get an attention score_depth
+def get_score_attention(x_hand, y_hand, z_hand, x_obj, y_obj, z_obj):
+    score = math.sqrt((x_hand - x_obj)*(x_hand - x_obj) + (y_hand - y_obj)*(y_hand - y_obj)+ (z_hand - z_obj)*(z_hand - z_obj))
+    return score
+
 
 # Get real world coordinates, not sure if in meter since depthmap is given in mm
 def get_coordinate(pixel_y, pixel_x):
@@ -32,6 +39,10 @@ def get_coordinate(pixel_y, pixel_x):
     Y = depth_f*(v-matrix[1][2])/(matrix[1][1])
     Z = depth_f
     return [int(X), int(Y), int(Z)]
+
+# Create function that calculates Depth Distance aka Z from the middle of a ROI
+def distance_depth(point_x, point_y):
+    return int(depth_image[point_x, point_y])
 
 
 # Configure depth and color streams
@@ -89,14 +100,20 @@ try:
     
         # Drawing the landmark and find the distance centimeter
         if results.multi_hand_landmarks:
-                for handLms in results.multi_hand_landmarks:
-                    for id, lm in enumerate(handLms.landmark):
-                        #print(id,lm) id = type of landmark; lm coordinates of the landmark
+            for handLms in results.multi_hand_landmarks:
+                for id, lm in enumerate(handLms.landmark):
+                    #print(id,lm) id = type of landmark; lm coordinates of the landmark
                         h, w, c = color_image.shape
                         cx, cy = int(lm.x *w), int(lm.y*h)
                         
+                        # cv2.putText(color_image, f"Object green score is: {obj_green_score}", (15,15), 0, 1, (0,0,0), 2)
                         if id == 9:
+                            if cy <481 and cy >0 and cx<481 and cx >0:
+                                hand_x, hand_y, hand_z = get_coordinate(cy, cx)
                             cv2.circle(color_image, (cx,cy), 10, (255,0,255), cv2.FILLED)
+                            # (255,182,193)
+           
+                            cv2.putText(color_image, "x:{0} y:{1} z:{2}".format(hand_x, hand_y, hand_z), (cx-100, cy-20), 0, 1, (0, 0, 0), 2)
 
         depth_colormap_dim = depth_colormap.shape
         color_colormap_dim = color_image.shape
@@ -111,10 +128,10 @@ try:
         cv2.imshow('Project', images)
         e2 = cv2.getTickCount()
         t = (e2 - e1) / cv2.getTickFrequency()
-        cv2.imwrite(f'image_colors/test_pictures_2022_05_20/pyramid_test/test8/detect_hand_test_{t}.png', images)
-        if t>10: # change it to record what length of video you are interested in
-            print("Done!")
-            break
+        cv2.imwrite(f'image_colors/test_pictures_2022_05_22/hand_pos/test3/hand_pos{t}.png', images)
+        # if t>10: # change it to record what length of video you are interested in
+        #     print("Done!")
+        #     break
         key = cv2.waitKey(30)
         
         # Esc button

@@ -72,7 +72,7 @@ def get_color(img_hsv, lower, upper):
      # print(len(cn))
     while i < len(cn):
         M = cv2.moments(cn[i])
-        if (M['m00']!=0):
+        if (M['m00']!=0 and M['m00']>2000 and M['m00']<7000):
             cx = int(M['m10']/M['m00'])
             cy = int(M['m01']/M['m00'])
             # center_points += [int(xg+np.floor(wg/2)), int(yg+np.floor(hg/2))]
@@ -144,6 +144,7 @@ else:
 
 # Start streaming
 pipeline.start(config)
+e1 = cv2.getTickCount()
 
 try:
     while True:
@@ -169,16 +170,16 @@ try:
        
         frame_hsv = cv2.cvtColor(color_image, cv2.COLOR_BGR2HSV)
 
-        # x_blue, y_blue, z_blue = get_color(frame_hsv, blue_lower_range, blue_upper_range)
-        # if x_blue != NULL and y_blue != NULL and z_blue != NULL:
-        #     print(f"Object blue detected and has the coordinates x:{x_blue}, y:{y_blue}, z:{z_blue}")
-        # x_red, y_red, z_red = get_color(frame_hsv, red_lower_range, red_upper_range)
-        # if x_red != NULL and y_red != NULL and z_red != NULL:
-            # print(f"Object red detected and has the coordinates x:{x_red}, y:{y_red}, z:{z_red}")
-        x_green, y_green, z_green = get_color(frame_hsv, green_lower_range, green_upper_range)
-        if x_green != None and y_green != None and z_green != None and print_ok == 0:
-            print(f"Object green detected and has the coordinates x:{x_green}, y:{y_green}, z:{z_green}")
-            print_ok = 1
+        x_blue, y_blue, z_blue = get_color(frame_hsv, blue_lower_range, blue_upper_range)
+        if x_blue != None and y_blue != None and z_blue != None:
+            print(f"Object blue detected and has the coordinates x:{x_blue}, y:{y_blue}, z:{z_blue}")
+        x_red, y_red, z_red = get_color(frame_hsv, red_lower_range, red_upper_range)
+        if x_red != None and y_red != None and z_red != None:
+            print(f"Object red detected and has the coordinates x:{x_red}, y:{y_red}, z:{z_red}")
+        # x_green, y_green, z_green = get_color(frame_hsv, green_lower_range, green_upper_range)
+        #if x_green != None and y_green != None and z_green != None and print_ok == 0:
+           # print(f"Object green detected and has the coordinates x:{x_green}, y:{y_green}, z:{z_green}")
+           # print_ok = 1
         # x_orange, y_orange, z_orange = get_color(frame_hsv, orange_lower_range, orange_upper_range)
         # if x_orange != NULL and y_orange != NULL and z_orange != NULL:
         #     print(f"Object orange detected and has the coordinates x:{x_orange}, y:{y_orange}, z:{z_orange}")
@@ -200,12 +201,13 @@ try:
                 for id, lm in enumerate(handLms.landmark):
                     #print(id,lm) id = type of landmark; lm coordinates of the landmark
                         h, w, c = color_image.shape
-                        cx, cy = int(lm.x *w), int(lm.y*h)
-                        hand_x, hand_y, hand_z = get_coordinate(cy, cx)
-                        if (hand_x != 0 or hand_x != None) and (hand_y!=0 and hand_y!=None) and (hand_z !=0 or hand_z != None):
-                            obj_green_score = get_score_attention(hand_x,hand_y,hand_z, x_green, y_green, z_green)
-                            obj_green_score = int(obj_green_score)
-                            print(f"Object green score is {obj_green_score}")
+                        cx, cy = int(lm.x *w), int(lm.y*h) 
+                        if cx>0 and cy>0 and cx < 480 and cy<480:
+                            hand_x, hand_y, hand_z = get_coordinate(cy, cx)
+                        # if (hand_x != 0 or hand_x != None) and (hand_y!=0 and hand_y!=None) and (hand_z !=0 or hand_z != None):
+                            # obj_green_score = get_score_attention(hand_x,hand_y,hand_z, x_green, y_green, z_green)
+                            # obj_green_score = int(obj_green_score)
+                            # print(f"Object green score is {obj_green_score}")
                         # cv2.putText(color_image, f"Object green score is: {obj_green_score}", (15,15), 0, 1, (0,0,0), 2)
                         if id == 9:
                             cv2.circle(color_image, (cx,cy), 10, (255,0,255), cv2.FILLED)
@@ -222,6 +224,12 @@ try:
         # Show images
         cv2.namedWindow('Project', cv2.WINDOW_AUTOSIZE)
         cv2.imshow('Project', images)
+        e2 = cv2.getTickCount()
+        t = (e2 - e1) / cv2.getTickFrequency()
+        cv2.imwrite(f"image_colors/test_pictures_2022_05_22/new_simmulation/test3/new_simulation_{t}.png", images)
+        # if t>10: # change it to record what length of video you are interested in
+        #     print("Done!")
+        #     break
         key = cv2.waitKey(30)
         
         # Esc button
