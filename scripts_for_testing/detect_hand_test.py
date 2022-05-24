@@ -93,6 +93,8 @@ try:
 
         # Apply colormap on depth image (image must be converted to 8-bit per pixel first)
         depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha = 0.03), cv2.COLORMAP_JET)
+
+        # Detecting hand
         mp_hand = mp.solutions.hands
         hands = mp_hand.Hands(max_num_hands=1) # number of hands
         mp.draw = mp.solutions.drawing_utils
@@ -102,18 +104,16 @@ try:
         if results.multi_hand_landmarks:
             for handLms in results.multi_hand_landmarks:
                 for id, lm in enumerate(handLms.landmark):
-                    #print(id,lm) id = type of landmark; lm coordinates of the landmark
-                        h, w, c = color_image.shape
-                        cx, cy = int(lm.x *w), int(lm.y*h)
-                        
-                        # cv2.putText(color_image, f"Object green score is: {obj_green_score}", (15,15), 0, 1, (0,0,0), 2)
-                        if id == 9:
-                            if cy <481 and cy >0 and cx<481 and cx >0:
-                                hand_x, hand_y, hand_z = get_coordinate(cy, cx)
+                    print(id,lm) # id = type of landmark; coordinates of the landmark between 0 - 1
+                    h, w, c = color_image.shape
+                    cx, cy = int(lm.x *w), int(lm.y*h)
+
+                    if id == 9:
+                            hand_x, hand_y, hand_z = get_coordinate(cy, cx)
                             cv2.circle(color_image, (cx,cy), 10, (255,0,255), cv2.FILLED)
-                            # (255,182,193)
-           
                             cv2.putText(color_image, "x:{0} y:{1} z:{2}".format(hand_x, hand_y, hand_z), (cx-100, cy-20), 0, 1, (0, 0, 0), 2)
+                          
+                            # (255,182,193)
 
         depth_colormap_dim = depth_colormap.shape
         color_colormap_dim = color_image.shape
