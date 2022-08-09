@@ -6,8 +6,8 @@ import math
 import time
 
 
-FX = 386.953
-FY = 386.953
+FX = 386.953 * 2
+FY = 386.953 * 2
 PPX = 319.307
 PPY = 241.853
 print(PPY, PPX)
@@ -17,14 +17,11 @@ CamMatrix = np.asarray([[FX, 0.0, PPX, 0],
 
 
 def get_coordinate(POI, depth_image, matrix=CamMatrix):
-    u = POI[0]
-    v = POI[1]
-    x = (u - matrix[0][2])
-    y = -(v - matrix[1][2])
     Z = depth_image[POI[1], POI[0]]
-
-    X = Z * x / (matrix[0][0])
-    Y = Z * y / (matrix[1][1])
+    u = POI[0] * Z
+    v = POI[1] * Z
+    X = -(u - matrix[0, 2] * Z) / (matrix[0, 0])
+    Y = -(v - matrix[1, 2] * Z) / (matrix[1, 1])
     return [int(X), int(Y), int(Z)]
 
 
@@ -68,7 +65,7 @@ align_to = rs.stream.color
 align = rs.align(align_to)
 
 # Start streaming
-pipeline.start(config)
+cfg = pipeline.start(config)
 px = 320
 py = 120
 POI = [px, py]
@@ -76,6 +73,9 @@ POI_T = [POI[1], POI[0]]
 output = "You done fucked up"
 cv.namedWindow("rgb", 1)
 cv.setMouseCallback("rgb", changePOI)
+profile = cfg.get_stream(rs.stream.depth)
+intr = profile.as_video_stream_profile().get_intrinsics()
+print(intr.fx, intr.fy, )
 while True:
     # Wait for a coherent pair of frames: depth and color
     frames = pipeline.wait_for_frames()
@@ -93,7 +93,7 @@ while True:
     cv.circle(color_image, POI, 5, [255, 255, 255])
     cv.putText(color_image, f"depth here: {depth_image[POI[1], POI[0]]}", POI, cv.FONT_HERSHEY_PLAIN, 1,
                (0, 255, 0), 2, cv.LINE_AA)
-    cv.putText(color_image, f"output here: {output} at: {[POI[0] - 320, -(POI[1] - 240)]}", [20, 450], cv.FONT_HERSHEY_PLAIN, 1,
+    cv.putText(color_image, f"output here: {output} at: {[POI[0] - 320, (POI[1] - 240)]}", [20, 450], cv.FONT_HERSHEY_PLAIN, 1,
                (0, 255, 0), 2, cv.LINE_AA)
     # Show images
     cv.imshow("rgb", color_image)
