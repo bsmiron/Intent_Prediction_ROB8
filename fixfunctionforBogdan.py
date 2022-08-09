@@ -6,11 +6,10 @@ import math
 import time
 
 
-FX = 386.953 * 2
-FY = 386.953 * 2
-PPX = 319.307
-PPY = 241.853
-print(PPY, PPX)
+FX = 640
+FY = 640
+PPX = 320
+PPY = 240
 CamMatrix = np.asarray([[FX, 0.0, PPX, 0],
                         [0.0, FY, PPY, 0],
                         [0.0, 0.0, 1.0, 0]])
@@ -73,9 +72,8 @@ POI_T = [POI[1], POI[0]]
 output = "You done fucked up"
 cv.namedWindow("rgb", 1)
 cv.setMouseCallback("rgb", changePOI)
-profile = cfg.get_stream(rs.stream.depth)
-intr = profile.as_video_stream_profile().get_intrinsics()
-print(intr.fx, intr.fy, )
+# profile = cfg.get_stream(rs.stream.depth)
+# intr = profile.as_video_stream_profile().get_intrinsics()
 while True:
     # Wait for a coherent pair of frames: depth and color
     frames = pipeline.wait_for_frames()
