@@ -29,8 +29,13 @@ CamMatrix = np.asarray([[FX, 0.0, PPX, 0],
 
 class KalmanFilter2D:
   kf = cv2.KalmanFilter(4, 2)
-  kf.measurementMatrix = np.array([[1, 0, 0, 0], [0, 1, 0, 0]], np.float32)
-  kf.transitionMatrix = np.array([[1, 0, 1, 0], [0, 1, 0, 1], [0, 0, 1, 0], [0, 0, 0, 1]], np.float32)
+  kf.measurementMatrix = np.array([[1, 0, 0, 0], 
+                                   [0, 1, 0, 0]], np.float32)
+
+  kf.transitionMatrix = np.array([[1, 0, 1, 0],
+                                  [0, 1, 0, 1],
+                                  [0, 0, 1, 0],
+                                  [0, 0, 0, 1]], np.float32)
   
 
   def estimamte_2d(self, pixel_x, pixel_y):
@@ -43,13 +48,21 @@ class KalmanFilter2D:
 class KalmanFilter3D:
   kf = cv2.KalmanFilter(6, 3)
 
-  #problem with x, y and z seems fine
-  # kf.measurementMatrix = np.array([[1, 0, 0, 0, 0 ,0 ], [0, 1, 0, 0, 0, 0], [0, 0, 1, 0, 0, 0]], np.float32)
-  # kf.transitionMatrix = np.array([[1, 0, 1, 0, 0, 0], [0, 1, 0, 1, 0, 0], [0, 0, 1, 0, 0, 1], [0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 1, 0], [0, 0, 0, 0, 0, 1]], np.float32)
+  #problem with x. y and z seem fine
+  kf.measurementMatrix = np.array([[1, 0, 0, 0, 0 ,0], 
+                                   [0, 1, 0, 0, 0, 0], 
+                                   [0, 0, 1, 0, 0, 0]], np.float32)
+
+  kf.transitionMatrix = np.array([[1, 0, 0, 1, 0, 0], 
+                                  [0, 1, 0, 0, 1, 0], 
+                                  [0, 0, 1, 0, 0, 1],
+                                  [0, 0, 0, 1, 0, 0],
+                                  [0, 0, 0, 0, 1, 0],
+                                  [0, 0, 0, 0, 0, 1]], np.float32)
   
   #this not working/erros
-  kf.measurementMatrix = np.array([[1,0,0,0,0,0], [0,0,1,0,0,0], [0,0,0,0,1,0]])
-  kf.transitionMatrix = np.array([[1,1,0,0,0,0], [0,0,1,1,0,0],[0,0,0,0,1,1],[0,1,0,0,0,0],[0,0,0,1,0,0],[0,0,0,0,0,1]])
+  # kf.measurementMatrix = np.array([[1,0,0,0,0,0], [0,0,1,0,0,0], [0,0,0,0,1,0]])
+  # kf.transitionMatrix = np.array([[1,1,0,0,0,0], [0,0,1,1,0,0],[0,0,0,0,1,1],[0,1,0,0,0,0],[0,0,0,1,0,0],[0,0,0,0,0,1]])
 
   def estimamte_3d(self, pixel_x, pixel_y, pixel_z):
     measured = np.array([[np.float32(pixel_x)], [np.float32(pixel_y)], [np.float32(pixel_z)]])
@@ -57,7 +70,7 @@ class KalmanFilter3D:
     predicted = self.kf.predict()
     int_predicted = predicted.astype(int)
     return int_predicted[0], int_predicted[1], int_predicted[2]
-
+    # return int_predicted[2]
 
 
 def get_coordinate(pixel_x, pixel_y, depth_image, matrix=CamMatrix):
@@ -146,9 +159,13 @@ with mp_hands.Hands(
                         
                         # 3D KF
                         pred3_x, pred3_y, pred3_z = kfobj3d.estimamte_3d(hand_x, hand_y, hand_z)
+
+                        #convert real world coordinates in pixels to show the dot in image
                         if (pred3_x - 25) < color_image.shape[0] and pred3_x > 25 and (pred3_y - 25) < color_image.shape[0] and pred3_y > 25:
                            cv2.circle(color_image, (int(pred3_x), int(pred3_y)), 2, (255, 255, 0), 2)
-                       
+                        cv2.circle(color_image, (int(pred3_x), int(pred3_y)), 2, (255, 255, 0), 2)
+
+
                         print(f'hand_x = {hand_x}, hand_y = {hand_y}, hand_z = {hand_z}')
                         print(f'hand_x_pred3d = {pred3_x}, hand_y_pred3d = {pred3_y}, hand_z_pred3d = {pred3_z}')  
 
