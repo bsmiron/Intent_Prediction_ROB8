@@ -48,11 +48,12 @@ class KalmanFilter2D:
 class KalmanFilter3D:
   kf = cv2.KalmanFilter(6, 3)
 
-  #problem with x. y and z seem fine
+  # H matrix 
   kf.measurementMatrix = np.array([[1, 0, 0, 0, 0 ,0], 
                                    [0, 1, 0, 0, 0, 0], 
                                    [0, 0, 1, 0, 0, 0]], np.float32)
 
+  # A matrix
   kf.transitionMatrix = np.array([[1, 0, 0, 1, 0, 0], 
                                   [0, 1, 0, 0, 1, 0], 
                                   [0, 0, 1, 0, 0, 1],
@@ -60,9 +61,6 @@ class KalmanFilter3D:
                                   [0, 0, 0, 0, 1, 0],
                                   [0, 0, 0, 0, 0, 1]], np.float32)
   
-  #this not working/erros
-  # kf.measurementMatrix = np.array([[1,0,0,0,0,0], [0,0,1,0,0,0], [0,0,0,0,1,0]])
-  # kf.transitionMatrix = np.array([[1,1,0,0,0,0], [0,0,1,1,0,0],[0,0,0,0,1,1],[0,1,0,0,0,0],[0,0,0,1,0,0],[0,0,0,0,0,1]])
 
   def estimamte_3d(self, pixel_x, pixel_y, pixel_z):
     measured = np.array([[np.float32(pixel_x)], [np.float32(pixel_y)], [np.float32(pixel_z)]])
@@ -72,6 +70,11 @@ class KalmanFilter3D:
     return int_predicted[0], int_predicted[1], int_predicted[2]
     # return int_predicted[2]
 
+def get_pixels(coord_x, coord_y, coord_z):
+
+  u = -(coord_x / coord_z) * FX + PPX
+  v = -(coord_y / coord_z) * FY + PPY
+  return u, v
 
 def get_coordinate(pixel_x, pixel_y, depth_image, matrix=CamMatrix):
     
@@ -161,9 +164,10 @@ with mp_hands.Hands(
                         pred3_x, pred3_y, pred3_z = kfobj3d.estimamte_3d(hand_x, hand_y, hand_z)
 
                         #convert real world coordinates in pixels to show the dot in image
-                        if (pred3_x - 25) < color_image.shape[0] and pred3_x > 25 and (pred3_y - 25) < color_image.shape[0] and pred3_y > 25:
-                           cv2.circle(color_image, (int(pred3_x), int(pred3_y)), 2, (255, 255, 0), 2)
-                        cv2.circle(color_image, (int(pred3_x), int(pred3_y)), 2, (255, 255, 0), 2)
+                        kf_x, kf_y = get_pixels(pred3_x, pred3_y, pred3_z)
+                        if (kf_x - 25) < color_image.shape[0] and kf_x > 25 and (kf_y - 25) < color_image.shape[0] and kf_y > 25:
+                           cv2.circle(color_image, (int(kf_x), int(kf_y)), 2, (255, 255, 0), 2)
+                        # cv2.circle(color_image, (int(kf_x), int(kf_y)), 2, (255, 255, 0), 2)
 
 
                         print(f'hand_x = {hand_x}, hand_y = {hand_y}, hand_z = {hand_z}')
