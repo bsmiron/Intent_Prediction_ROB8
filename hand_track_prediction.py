@@ -60,6 +60,19 @@ class KalmanFilter3D:
                                   [0, 0, 0, 1, 0, 0],
                                   [0, 0, 0, 0, 1, 0],
                                   [0, 0, 0, 0, 0, 1]], np.float32)
+                              
+  kf.processNoiseCov = np.array([[1, 0, 0, 0, 0, 0],
+                                 [0, 1, 0, 0, 0, 0],
+                                 [0, 0, 1, 0, 0, 0], 
+                                 [0, 0, 0, 1, 0, 0],
+                                 [0, 0, 0, 0, 1, 0],
+                                 [0, 0, 0, 0, 0, 1]], np.float32) * 0.007
+
+  kf.measurementNoiseCov = np.array([[1, 0, 0],
+                                     [0, 1, 0],
+                                     [0, 0, 1]], np.float32) * 0.1
+
+
   
 
   def estimamte_3d(self, pixel_x, pixel_y, pixel_z):
@@ -78,12 +91,10 @@ def get_pixels(coord_x, coord_y, coord_z):
 
 def get_coordinate(pixel_x, pixel_y, depth_image, matrix=CamMatrix):
     
-    z = depth_image[pixel_y, pixel_x] * 40 # the result of depth is in mm
-    # print(z) # = [2 2 2] should be 2
+    # the result of depth is in mm
     cam_coord = [pixel_x, pixel_y]
     Z = depth_image[cam_coord[1], cam_coord[0]] * 40
-    # print(Z)
-    
+  
     u = cam_coord[0] * Z
     v = cam_coord[1] * Z
     X = -(u - matrix[0, 2] * Z) / (matrix[0, 0])
@@ -143,7 +154,7 @@ with mp_hands.Hands(
             # mp_drawing_styles.get_default_hand_connections_style())
 
         for id, lm in enumerate(hand_landmarks.landmark):
-                    #print(id,lm) id = type of landmark; lm coordinates of the landmark
+                    #print(id,lm) id = type of landmark; lm coordinateGIITf the landmark
                     h, w, c = color_image.shape
                     cx, cy = int(lm.x *w), int(lm.y*h)
                          
@@ -153,7 +164,8 @@ with mp_hands.Hands(
                         hand_x, hand_y, hand_z = get_coordinate(cx, cy, depth_image_gray) #x and y
                         
                         # 2D KF
-                        predicted_x, predicted_y = kfobj2d.estimamte_2d(cx, cy)
+
+                        #predicted_x, predicted_y = kfobj2d.estimamte_2d(cx, cy)
                         # print(f'predicted 2d coord piexels x = {predicted_x}, y = {predicted_y} real pixel coord x = {cx} y = {cy}')
                         # if (predicted_x - 25) < color_image.shape[0] and predicted_x > 25 and (predicted_y - 25) < color_image.shape[0] and predicted_y > 25:
                           # cv2.circle(color_image, (int(predicted_x), int(predicted_y)), 2, (255, 255, 0), 2)
@@ -167,9 +179,8 @@ with mp_hands.Hands(
                         kf_x, kf_y = get_pixels(pred3_x, pred3_y, pred3_z)
                         if (kf_x - 25) < color_image.shape[0] and kf_x > 25 and (kf_y - 25) < color_image.shape[0] and kf_y > 25:
                            cv2.circle(color_image, (int(kf_x), int(kf_y)), 2, (255, 255, 0), 2)
-                        # cv2.circle(color_image, (int(kf_x), int(kf_y)), 2, (255, 255, 0), 2)
-
-
+                        
+                        # show the results to compare real coordinates with KF coordinates
                         print(f'hand_x = {hand_x}, hand_y = {hand_y}, hand_z = {hand_z}')
                         print(f'hand_x_pred3d = {pred3_x}, hand_y_pred3d = {pred3_y}, hand_z_pred3d = {pred3_z}')  
 
