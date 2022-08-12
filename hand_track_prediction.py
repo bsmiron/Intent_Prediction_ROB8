@@ -4,6 +4,15 @@ import cv2
 import mediapipe as mp
 import math
 import time
+import os
+import subprocess
+
+# def generate_video():
+#     os.chdir(folder)
+#     subprocess.call([
+#         'ffmpeg', '-framerate', '30', '-i', 'file%02d.png', '-r', '30', '-pix_fmt', 'yuv420p',
+#         'video_name.mp4'
+#     ])
 
 FX = 640
 FY = 640
@@ -13,6 +22,20 @@ CamMatrix = np.asarray([[FX, 0.0, PPX, 0],
                         [0.0, FY, PPY, 0],
                         [0.0, 0.0, 1.0, 0]])
 
+
+# Initialize KF from OpenCV
+
+class KalmanFilter:
+  kf = cv2.KalmanFilter(4,2)
+  kf.measurementMatrix = np.array([[1, 0, 0, 0], [0, 1, 0, 0]], np.float32)
+  kf.transitionMatrix = np.array([[1, 0, 1, 0], [0, 1, 0, 1], [0, 0, 1, 0], [0, 0, 0, 1]], np.float32)
+
+  def estimamte_2d(self, pixel_x, pixel_y):
+    measured = np.array([[np.float32(pixel_x)], [np.float32(pixel_y)]])
+    self.kf.correct(measured)
+    predicted = self.kf.predict()
+    int_predicted = predicted.astype(int)
+    return int_predicted[0], int_predicted[1]
 
 def get_coordinate(pixel_x, pixel_y, depth_image, matrix=CamMatrix):
     
@@ -42,6 +65,10 @@ mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_hands = mp.solutions.hands
 hands = mp_hands.Hands(max_num_hands=1)
+
+kfobj = KalmanFilter()
+# predicted_coord = np.zeros((2,1), np.float32) 
+
 
 with mp_hands.Hands(
     model_complexity=0,
@@ -80,12 +107,17 @@ with mp_hands.Hands(
                     h, w, c = color_image.shape
                     cx, cy = int(lm.x *w), int(lm.y*h)
                          
-                    if id == 9 and (cx - 20) < color_image.shape[0] and cx > 20 and (cy - 20) < color_image.shape[1] and cy > 20 :
-                        print(cx, cy)
+                    if id == 9: #and (cx - 20) < color_image.shape[0] and cx > 20 and (cy - 20) < color_image.shape[1] and cy > 20 :
+                        # print(cx, cy)
                         cv2.circle(color_image,(cx, cy), 2, (255, 0, 255), 2)
                         hand_x, hand_y, hand_z = get_coordinate(cx, cy, depth_image_gray) #x and y
+                        predicted_x, predicted_y = kfobj.estimamte_2d(cx, cy)
+                        # print(f'predicted coordintate x = {predicted_x}, y = {predicted_y} real pixel coord x = {cx} y = {cy}')
+                        if (predicted_x - 25) < color_image.shape[0] and predicted_x > 25 and (predicted_y - 25) < color_image.shape[0] and predicted_y > 25:
+                          cv2.circle(color_image, (int(predicted_x), int(predicted_y)), 2, (255, 255, 0), 2)
+                        hand_x_pred, hand_y_pred, hand_z_pred = get_coordinate(predicted_x, predicted_y, depth_image_gray)
                         print(f'hand_x = {hand_x}, hand_y = {hand_y}, hand_z = {hand_z}')
-          
+                        print(f'hand_x_pred = {hand_x_pred}, hand_y_pred = {hand_y_pred}, hand_z_pred = {hand_z_pred}')  
     # Flip the image horizontally for a selfie-view display.
     cv2.imshow('test',color_image)
     if cv2.waitKey(5) & 0xFF == 27:
