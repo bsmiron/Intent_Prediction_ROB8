@@ -162,7 +162,7 @@ with mp_hands.Hands(
                         # print(cx, cy)
                         cv2.circle(color_image,(cx, cy), 2, (255, 0, 255), 2)
                         hand_x, hand_y, hand_z = get_coordinate(cx, cy, depth_image_gray) #x and y
-                        
+                       
                         # 2D KF
 
                         #predicted_x, predicted_y = kfobj2d.estimamte_2d(cx, cy)
@@ -178,9 +178,16 @@ with mp_hands.Hands(
                         #convert real world coordinates in pixels to show the dot in image
                         kf_x, kf_y = get_pixels(pred3_x, pred3_y, pred3_z)
                         if (kf_x - 25) < color_image.shape[0] and kf_x > 25 and (kf_y - 25) < color_image.shape[0] and kf_y > 25:
-                           cv2.circle(color_image, (int(kf_x), int(kf_y)), 2, (255, 255, 0), 2)
+                          cv2.circle(color_image, (int(kf_x), int(kf_y)), 2, (255, 255, 0), 2)
+                        
                         
                         # show the results to compare real coordinates with KF coordinates
+                        cv2.putText(color_image, 'Actual traking', (10, 430), cv2.FONT_HERSHEY_DUPLEX, 1, (255, 0, 255), 1)
+                        cv2.putText(color_image, f'x:{hand_x}, y:{hand_y}, z:{hand_z}', (250, 430), cv2.FONT_HERSHEY_DUPLEX, 1, (255, 0, 255), 1)
+
+                        cv2.putText(color_image, 'KF traking', (int(10), int(460)), cv2.FONT_HERSHEY_DUPLEX, 1, (255, 255, 0), 1)
+                        cv2.putText(color_image, f'x:{pred3_x}, y:{pred3_y}, z:{pred3_z}', (200, 460), cv2.FONT_HERSHEY_DUPLEX, 1, (255, 255, 0), 1)
+                       
                         print(f'hand_x = {hand_x}, hand_y = {hand_y}, hand_z = {hand_z}')
                         print(f'hand_x_pred3d = {pred3_x}, hand_y_pred3d = {pred3_y}, hand_z_pred3d = {pred3_z}')  
 
