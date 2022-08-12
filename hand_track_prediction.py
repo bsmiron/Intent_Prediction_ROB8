@@ -7,6 +7,8 @@ import time
 import os
 import subprocess
 
+# folder = 'folder'
+
 # def generate_video():
 #     os.chdir(folder)
 #     subprocess.call([
@@ -25,10 +27,11 @@ CamMatrix = np.asarray([[FX, 0.0, PPX, 0],
 
 # Initialize KF from OpenCV
 
-class KalmanFilter:
-  kf = cv2.KalmanFilter(4,2)
+class KalmanFilter2D:
+  kf = cv2.KalmanFilter(4, 2)
   kf.measurementMatrix = np.array([[1, 0, 0, 0], [0, 1, 0, 0]], np.float32)
   kf.transitionMatrix = np.array([[1, 0, 1, 0], [0, 1, 0, 1], [0, 0, 1, 0], [0, 0, 0, 1]], np.float32)
+  
 
   def estimamte_2d(self, pixel_x, pixel_y):
     measured = np.array([[np.float32(pixel_x)], [np.float32(pixel_y)]])
@@ -36,6 +39,26 @@ class KalmanFilter:
     predicted = self.kf.predict()
     int_predicted = predicted.astype(int)
     return int_predicted[0], int_predicted[1]
+
+class KalmanFilter3D:
+  kf = cv2.KalmanFilter(6, 3)
+
+  #problem with x, y and z seems fine
+  # kf.measurementMatrix = np.array([[1, 0, 0, 0, 0 ,0 ], [0, 1, 0, 0, 0, 0], [0, 0, 1, 0, 0, 0]], np.float32)
+  # kf.transitionMatrix = np.array([[1, 0, 1, 0, 0, 0], [0, 1, 0, 1, 0, 0], [0, 0, 1, 0, 0, 1], [0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 1, 0], [0, 0, 0, 0, 0, 1]], np.float32)
+  
+  #this not working/erros
+  kf.measurementMatrix = np.array([[1,0,0,0,0,0], [0,0,1,0,0,0], [0,0,0,0,1,0]])
+  kf.transitionMatrix = np.array([[1,1,0,0,0,0], [0,0,1,1,0,0],[0,0,0,0,1,1],[0,1,0,0,0,0],[0,0,0,1,0,0],[0,0,0,0,0,1]])
+
+  def estimamte_3d(self, pixel_x, pixel_y, pixel_z):
+    measured = np.array([[np.float32(pixel_x)], [np.float32(pixel_y)], [np.float32(pixel_z)]])
+    self.kf.correct(measured)
+    predicted = self.kf.predict()
+    int_predicted = predicted.astype(int)
+    return int_predicted[0], int_predicted[1], int_predicted[2]
+
+
 
 def get_coordinate(pixel_x, pixel_y, depth_image, matrix=CamMatrix):
     
@@ -66,7 +89,8 @@ mp_drawing_styles = mp.solutions.drawing_styles
 mp_hands = mp.solutions.hands
 hands = mp_hands.Hands(max_num_hands=1)
 
-kfobj = KalmanFilter()
+kfobj2d = KalmanFilter2D()
+kfobj3d = KalmanFilter3D()
 # predicted_coord = np.zeros((2,1), np.float32) 
 
 
@@ -111,14 +135,28 @@ with mp_hands.Hands(
                         # print(cx, cy)
                         cv2.circle(color_image,(cx, cy), 2, (255, 0, 255), 2)
                         hand_x, hand_y, hand_z = get_coordinate(cx, cy, depth_image_gray) #x and y
-                        predicted_x, predicted_y = kfobj.estimamte_2d(cx, cy)
-                        # print(f'predicted coordintate x = {predicted_x}, y = {predicted_y} real pixel coord x = {cx} y = {cy}')
-                        if (predicted_x - 25) < color_image.shape[0] and predicted_x > 25 and (predicted_y - 25) < color_image.shape[0] and predicted_y > 25:
-                          cv2.circle(color_image, (int(predicted_x), int(predicted_y)), 2, (255, 255, 0), 2)
-                        hand_x_pred, hand_y_pred, hand_z_pred = get_coordinate(predicted_x, predicted_y, depth_image_gray)
+                        
+                        # 2D KF
+                        predicted_x, predicted_y = kfobj2d.estimamte_2d(cx, cy)
+                        # print(f'predicted 2d coord piexels x = {predicted_x}, y = {predicted_y} real pixel coord x = {cx} y = {cy}')
+                        # if (predicted_x - 25) < color_image.shape[0] and predicted_x > 25 and (predicted_y - 25) < color_image.shape[0] and predicted_y > 25:
+                          # cv2.circle(color_image, (int(predicted_x), int(predicted_y)), 2, (255, 255, 0), 2)
+                        # hand_x_pred, hand_y_pred, hand_z_pred = get_coordinate(predicted_x, predicted_y, depth_image_gray)
+                        # print(f'hand_x_pred2d = {hand_x_pred}, hand_y_pred2d = {hand_y_pred}, hand_z_pred = {hand_z_pred}')
+                        
+                        # 3D KF
+                        pred3_x, pred3_y, pred3_z = kfobj3d.estimamte_3d(hand_x, hand_y, hand_z)
+                        if (pred3_x - 25) < color_image.shape[0] and pred3_x > 25 and (pred3_y - 25) < color_image.shape[0] and pred3_y > 25:
+                           cv2.circle(color_image, (int(pred3_x), int(pred3_y)), 2, (255, 255, 0), 2)
+                       
                         print(f'hand_x = {hand_x}, hand_y = {hand_y}, hand_z = {hand_z}')
-                        print(f'hand_x_pred = {hand_x_pred}, hand_y_pred = {hand_y_pred}, hand_z_pred = {hand_z_pred}')  
+                        print(f'hand_x_pred3d = {pred3_x}, hand_y_pred3d = {pred3_y}, hand_z_pred3d = {pred3_z}')  
+
+
+
+
     # Flip the image horizontally for a selfie-view display.
+    # generate_video()
     cv2.imshow('test',color_image)
     if cv2.waitKey(5) & 0xFF == 27:
       break
