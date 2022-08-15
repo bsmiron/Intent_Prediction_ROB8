@@ -6,15 +6,18 @@ import math
 import time
 import os
 import subprocess
+from mpl_toolkits import mplot3d
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
-# folder = 'folder'
+folder = 'folder'
 
 # def generate_video():
-#     os.chdir(folder)
-#     subprocess.call([
-#         'ffmpeg', '-framerate', '30', '-i', 'file%02d.png', '-r', '30', '-pix_fmt', 'yuv420p',
-#         'video_name.mp4'
-#     ])
+#      os.chdir(folder)
+#      subprocess.call([
+#          'ffmpeg', '-framerate', '30', '-i', 'file%02d.png', '-r', '30', '-pix_fmt', 'yuv420p',
+#          'video_name.mp4'
+#      ])
 
 FX = 640
 FY = 640
@@ -74,7 +77,6 @@ class KalmanFilter3D:
 
 
   
-
   def estimamte_3d(self, pixel_x, pixel_y, pixel_z):
     measured = np.array([[np.float32(pixel_x)], [np.float32(pixel_y)], [np.float32(pixel_z)]])
     self.kf.correct(measured)
@@ -121,6 +123,10 @@ kfobj3d = KalmanFilter3D()
 # predicted_coord = np.zeros((2,1), np.float32) 
 
 
+measured_points = []
+predicted_points = []
+predicted_points_1 = []
+predicted_points_2 = []
 with mp_hands.Hands(
     model_complexity=0,
     min_detection_confidence=0.5,
@@ -162,7 +168,8 @@ with mp_hands.Hands(
                         # print(cx, cy)
                         cv2.circle(color_image,(cx, cy), 2, (255, 0, 255), 2)
                         hand_x, hand_y, hand_z = get_coordinate(cx, cy, depth_image_gray) #x and y
-                       
+                        measured_points.append([hand_x, hand_y, hand_z])
+                        # print(measured_points)
                         # 2D KF
 
                         #predicted_x, predicted_y = kfobj2d.estimamte_2d(cx, cy)
@@ -173,10 +180,31 @@ with mp_hands.Hands(
                         # print(f'hand_x_pred2d = {hand_x_pred}, hand_y_pred2d = {hand_y_pred}, hand_z_pred = {hand_z_pred}')
                         
                         # 3D KF
+                        update = 0
                         pred3_x, pred3_y, pred3_z = kfobj3d.estimamte_3d(hand_x, hand_y, hand_z)
+                        XYZ1_pred = np.asanyarray([pred3_x, pred3_y, pred3_z, 1])
+                        predicted_points.append(XYZ1_pred[:-1])
+
+                        # Future update estimation
+                        if update == 0:
+                          pred3_1_x, pred3_1_y, pred3_1_z = kfobj3d.estimamte_3d(pred3_x, pred3_y, pred3_z)
+                          kf_x_1, kf_y_1 = get_pixels(pred3_1_x, pred3_1_y, pred3_1_z)
+                          cv2.circle(color_image, (int(kf_x_1), int(kf_y_1)), 2, (255, 120, 0), 2)
+                          XYZ1_1_pred = np.asanyarray([pred3_1_x, pred3_1_y, pred3_1_z, 1])
+                          predicted_points_1.append(XYZ1_1_pred[:-1])
+                          update = 1
+                          if update == 1:
+                            pred3_2_x, pred3_2_y, pred3_2_z = kfobj3d.estimamte_3d(pred3_1_x, pred3_1_y, pred3_1_z)
+                            kf_x_2, kf_y_2 = get_pixels(pred3_2_x, pred3_2_y, pred3_2_z)
+                            cv2.circle(color_image, (int(kf_x_2), int(kf_y_2)), 2, (255, 60, 0), 2)
+                            XYZ1_2_pred = np.asanyarray([pred3_2_x, pred3_2_y, pred3_2_z, 1])
+                            predicted_points_2.append(XYZ1_2_pred[:-1])
+                            update = 2
+
 
                         #convert real world coordinates in pixels to show the dot in image
                         kf_x, kf_y = get_pixels(pred3_x, pred3_y, pred3_z)
+                        
                         if (kf_x - 25) < color_image.shape[0] and kf_x > 25 and (kf_y - 25) < color_image.shape[0] and kf_y > 25:
                           cv2.circle(color_image, (int(kf_x), int(kf_y)), 2, (255, 255, 0), 2)
                         
@@ -188,16 +216,30 @@ with mp_hands.Hands(
                         cv2.putText(color_image, 'KF traking', (int(10), int(460)), cv2.FONT_HERSHEY_DUPLEX, 1, (255, 255, 0), 1)
                         cv2.putText(color_image, f'x:{pred3_x}, y:{pred3_y}, z:{pred3_z}', (200, 460), cv2.FONT_HERSHEY_DUPLEX, 1, (255, 255, 0), 1)
                        
-                        print(f'hand_x = {hand_x}, hand_y = {hand_y}, hand_z = {hand_z}')
-                        print(f'hand_x_pred3d = {pred3_x}, hand_y_pred3d = {pred3_y}, hand_z_pred3d = {pred3_z}')  
+                        # print(f'hand_x = {hand_x}, hand_y = {hand_y}, hand_z = {hand_z}')
+                        # print(f'hand_x_pred3d = {pred3_x}, hand_y_pred3d = {pred3_y}, hand_z_pred3d = {pred3_z}')  
 
 
 
 
     # Flip the image horizontally for a selfie-view display.
     # generate_video()
-    cv2.imshow('test',color_image)
+    # cv2.imshow('test',color_image)
     if cv2.waitKey(5) & 0xFF == 27:
       break
+
+# fig = plt.figure()
+# ax = plt.axes(projection='3d')
+# array_measured = np.asanyarray(measured_points)[10:]
+# # print(array_measured)
+# array_predicted = np.asanyarray(predicted_points)[10:]
+      
+# ax.plot3D(array_measured[:, 0], array_measured[:, 1])
+# # ax.plot(array_predicted[:, 0], array_predicted[:, 1], array_predicted[:, 2], 'turquoise')
+# ax.set_xlabel("x")
+# ax.set_ylabel("y")
+# ax.set_zlabel("z")
+# plt.show()
+
 rgb_cap.release()
 depth_cap.release()
