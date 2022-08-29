@@ -139,17 +139,17 @@ class ObjectColorDetector:
             return -1
 
 
-# detector = ObjectColorDetector(glob.glob("*.png"))
-# print(detector.targets_c_h_s.keys())
-# # test_image = cv.imread(r'pupil_test_003/00200.jpg')
-# test_image = cv.imread(r'pupil_recent/00200.jpg')
-# object_centers = detector.searchForAllObjects(test_image)
-# print(object_centers)
-# for center in object_centers.values():
-#     if len(center) == 1:
-#         center = center[0]
-#     cv.circle(test_image, center, 0, [255, 255, 255], 5)
-#     cv.circle(test_image, center, 2, 0, 1)
-# cv.imshow("centers", test_image)
-# cv.waitKey()
+detector = ObjectColorDetector(glob.glob("*.png"))
+print(detector.targets_c_h_s.keys())
+# test_image = cv.imread(r'pupil_test_003/00200.jpg')
+test_image = cv.imread('tests_and_results/test_pictures_2022_05_21/data/data1.jpeg')
+object_centers = detector.searchForAllObjects(test_image)
+print(object_centers)
+for center in object_centers.values():
+    if len(center) == 1:
+        center = center[0]
+    cv.circle(test_image, center, 0, [255, 255, 255], 5)
+    cv.circle(test_image, center, 2, 0, 1)
+cv.imshow("centers", test_image)
+cv.waitKey()
 
